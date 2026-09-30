@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rusça Kelime & Cümle Quiz - Duolingo Style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900;1000&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+:root {
+  --bg-color: #f7f9fa; --card-bg: #ffffff; --card-border: #e5e5e5; --text-main: #4b4b4b; --text-muted: #777777; --anim-color: #1e293b;
+  --duo-green: #58cc02; --duo-green-shadow: #46a302; --duo-blue: #1cb0f6; --duo-blue-shadow: #1899d6;
+  --duo-yellow: #ffc800; --duo-yellow-shadow: #e5b200; --duo-red: #ff4b4b; --duo-red-shadow: #ea2b2b;
+  --duo-gray: #e5e5e5; --duo-gray-shadow: #cecece;
+}
+body.theme-dark { --bg-color: #0f172a; --card-bg: #1e293b; --card-border: #334155; --text-main: #f8fafc; --text-muted: #94a3b8; --anim-color: #38bdf8; --duo-gray: #334155; --duo-gray-shadow: #1e293b; }
+body.theme-green { --bg-color: #ecfdf5; --card-bg: #ffffff; --card-border: #a7f3d0; --text-main: #065f46; --text-muted: #047857; --anim-color: #059669; --duo-green: #10b981; --duo-green-shadow: #059669; --duo-gray: #d1fae5; --duo-gray-shadow: #a7f3d0; }
+body.theme-pink { --bg-color: #fff1f2; --card-bg: #ffffff; --card-border: #fecdd3; --text-main: #881337; --text-muted: #9f1239; --anim-color: #e11d48; --duo-green: #fb7185; --duo-green-shadow: #e11d48; --duo-gray: #ffe4e6; --duo-gray-shadow: #fecdd3; }
+body.theme-cyber { --bg-color: #09090b; --card-bg: #18181b; --card-border: #27272a; --text-main: #fafafa; --text-muted: #a1a1aa; --anim-color: #a855f7; --duo-green: #8b5cf6; --duo-green-shadow: #6d28d9; --duo-gray: #27272a; --duo-gray-shadow: #18181b; }
+body.theme-sunset { --bg-color: #fff7ed; --card-bg: #ffffff; --card-border: #fed7aa; --text-main: #7c2d12; --text-muted: #9a3412; --anim-color: #ea580c; --duo-green: #f97316; --duo-green-shadow: #c2410c; --duo-gray: #ffedd5; --duo-gray-shadow: #fed7aa; }
+* { box-sizing: border-box; font-family: 'Nunito', sans-serif; user-select: none; }
+body { margin: 0; padding: 20px 10px; background: var(--bg-color); min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text-main); transition: background 0.3s ease, color 0.3s ease; position: relative; overflow-x: hidden; }
+.bg-animations { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; pointer-events: none; margin: 0; padding: 0; }
+.bg-animations li { position: absolute; list-style: none; display: flex; justify-content: center; align-items: center; font-weight: 900; color: var(--anim-color); opacity: 0.16; top: -100px; animation: rainMatrixAnim 7s infinite linear; }
+@keyframes rainMatrixAnim { 0% { transform: translateY(-10vh) rotate(0deg) scale(0.8); opacity: 0; } 20% { opacity: 0.25; } 80% { opacity: 0.25; } 100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; } }
+.duo-btn { border: none; border-radius: 16px; padding: 14px 24px; font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; transition: all 0.1s ease; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.duo-btn:active { transform: translateY(4px) !important; box-shadow: none !important; }
+.duo-btn-green { background-color: var(--duo-green); color: #fff; box-shadow: 0 5px 0 var(--duo-green-shadow); }
+.duo-btn-blue { background-color: var(--duo-blue); color: #fff; box-shadow: 0 5px 0 var(--duo-blue-shadow); }
+.duo-btn-yellow { background-color: var(--duo-yellow); color: #fff; box-shadow: 0 5px 0 var(--duo-yellow-shadow); }
+.duo-btn-gray { background-color: var(--duo-gray); color: var(--text-main); box-shadow: 0 5px 0 var(--duo-gray-shadow); }
+.duo-btn-red { background-color: var(--duo-red); color: #fff; box-shadow: 0 5px 0 var(--duo-red-shadow); }
+.theme-toggle { position: absolute; top: 20px; right: 20px; z-index: 10; width: 48px; height: 48px; padding: 0; font-size: 22px; border-radius: 50% !important; }
+.container { position: relative; z-index: 2; width: min(750px, 100%); background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 24px; padding: clamp(20px, 4vw, 40px); box-shadow: 0 10px 0 var(--card-border); transition: background 0.3s ease, border-color 0.3s ease; }
+h1 { text-align: center; margin-top: 0; font-size: clamp(22px, 2.8vw, 30px); font-weight: 900; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 25px; }
+.flag-icon { display: inline-flex; flex-direction: column; width: 36px; height: 24px; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.2); vertical-align: middle; border: 1px solid rgba(0,0,0,0.1); }
+.flag-icon span { flex: 1; width: 100%; }
+.flag-icon .white { background-color: #FFFFFF; } .flag-icon .blue { background-color: #0039A6; } .flag-icon .red { background-color: #D52B1E; }
+.upload { border: 2px dashed var(--card-border); border-radius: 20px; padding: clamp(20px, 4vw, 35px); text-align: center; background: rgba(0,0,0,0.01); }
+.quiz-config { margin-top: 20px; display: flex; flex-direction: column; gap: 18px; align-items: center; }
+.quiz-config-item { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+.quiz-config label { font-weight: 800; color: var(--text-main); font-size: 16px; }
+.quiz-config select, .quiz-config input[type=number] { padding: 12px 18px; font-size: 16px; font-weight: 700; border-radius: 14px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-main); outline: none; width: min(320px, 100%); text-align: center; }
+.duo-progress-container { width: 100%; height: 16px; background: var(--duo-gray); border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 25px; }
+.duo-progress-bar { height: 100%; width: 0%; background: var(--duo-green); border-radius: 20px; transition: width 0.3s ease; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 800; color: var(--text-muted); flex-wrap: wrap; gap: 8px; }
+.word-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0 30px; }
+.word { text-align: center; font-size: clamp(24px, 3.5vw, 36px); font-weight: 900; color: var(--text-main); }
+.star-btn { background: none; border: none; font-size: 32px; cursor: pointer; filter: grayscale(100%); opacity: 0.4; transition: all 0.2s; }
+.star-btn.active { filter: none; opacity: 1; transform: scale(1.2); }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.option { border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-main); border-radius: 16px; padding: 18px 14px; font-size: 18px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; box-shadow: 0 4px 0 var(--card-border); transition: all 0.1s ease; position: relative; }
+.option-badge { position: absolute; top: 8px; left: 12px; font-size: 13px; color: var(--text-muted); font-weight: 800; border: 1px solid var(--card-border); border-radius: 6px; padding: 1px 6px; }
+.option:hover { background: rgba(28, 176, 246, 0.08); border-color: var(--duo-blue); box-shadow: 0 4px 0 var(--duo-blue-shadow); }
+.option:active { transform: translateY(4px); box-shadow: none; }
+.option.correct { background-color: #d7ffb8 !important; border-color: var(--duo-green) !important; color: var(--duo-green-shadow) !important; box-shadow: 0 4px 0 var(--duo-green-shadow) !important; }
+.option.wrong { background-color: #ffdfe0 !important; border-color: var(--duo-red) !important; color: var(--duo-red-shadow) !important; box-shadow: 0 4px 0 var(--duo-red-shadow) !important; }
+.option.disabled { pointer-events: none; }
+.flashcard-area { perspective: 1000px; display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
+.flashcard { width: min(450px, 100%); height: 240px; position: relative; transform-style: preserve-3d; transition: transform 0.5s ease; cursor: pointer; }
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; border: 2px solid var(--card-border); background: var(--card-bg); box-shadow: 0 6px 0 var(--card-border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+.flashcard-back { transform: rotateY(180deg); background: rgba(28, 176, 246, 0.05); border-color: var(--duo-blue); box-shadow: 0 6px 0 var(--duo-blue-shadow); }
+.flashcard-text { font-size: 32px; font-weight: 900; text-align: center; }
+.flashcard-sub { font-size: 14px; color: var(--text-muted); margin-top: 10px; font-weight: 800; }
+#feedback { text-align: center; font-size: 20px; font-weight: 900; min-height: 36px; margin: 20px 0; }
+.controls { display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
+.notebook-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 100; justify-content: center; align-items: center; }
+.notebook-paper { background: var(--card-bg); border: 2px solid var(--card-border); width: min(600px, 90vw); max-height: 80vh; border-radius: 24px; padding: 25px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+.notebook-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
+.notebook-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.notebook-item { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 14px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
+@media(max-width:600px) { .options { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<ul class="bg-animations">
+  <li>А</li><li>Б</li><li>В</li><li>Г</li><li>Д</li><li>Е</li><li>Ё</li><li>Ж</li><li>З</li><li>И</li>
+  <li>Й</li><li>К</li><li>Л</li><li>М</li><li>Н</li><li>О</li><li>П</li><li>Р</li><li>С</li><li>Т</li>
+  <li>У</li><li>Ф</li><li>Х</li><li>Ц</li><li>Ч</li><li>Ш</li><li>Щ</li><li>Ъ</li><li>Ы</li><li>Ь</li>
+  <li>Э</li><li>Ю</li><li>Я</li><li>🪆</li><li>🇷🇺</li><li>🐻</li><li>❄️</li><li>🏛️</li>
+</ul>
+<button class="duo-btn duo-btn-gray theme-toggle" id="themeBtn" onclick="cycleTheme()" title="Tema Değiştir">☀️</button>
+<div class="container">
+  <h1>
+    <div class="flag-icon"><span class="white"></span><span class="blue"></span><span class="red"></span></div>
+    Rusça Kelime & Cümle Quiz (860+ Kelime & 300 Cümle)
+  </h1>
+  <div id="uploadArea" class="upload">
+    <div style="font-size:20px; font-weight:900; margin-bottom:6px;">Çalışma Modu Seçimi veya Excel Yükle</div>
+    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">860+ kelimelik dev havuz, 307 kelimelik ünite verileri ve 150+150 özel A1/A2 cümleler eklendi!</div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+    <button id="uploadFileBtn" class="duo-btn duo-btn-blue" onclick="document.getElementById('fileInput').click()">📁 Harici Excel Dosyası Seç</button>
+    
+    <div class="quiz-config">
+      <div class="quiz-config-item">
+        <label for="quizModeSelect">Çalışma Modu</label>
+        <select id="quizModeSelect" onchange="toggleCategoryGroup()">
+          <option value="flashcard">🎴 Kelime Kartları / Flashcard (860+ Kelime Dev Havuz)</option>
+          <option value="web_words">🌐 Genel Rusça Kelime Havuzu (860+ Kelime Test)</option>
+          <option value="unit_123">📚 1-2-3. Ünite (307 Kelime)</option>
+          <option value="choice">🔘 Yüklenen Excel Dosyası</option>
+          <option value="sentence_a1">📖 A1 Boşluk Doldurmalı Cümle Modu (150 Özgün Cümle)</option>
+          <option value="sentence_a2">📘 A2 Boşluk Doldurmalı Cümle Modu (150 Özgün Cümle)</option>
+        </select>
+      </div>
+      <div class="quiz-config-item" id="categoryConfigGroup" style="display:none;">
+        <label for="categorySelect">Kategori Seçin</label>
+        <select id="categorySelect">
+          <option value="all">🔀 Tüm Kategoriler (Karışık)</option>
+          <option value="food">🍕 Restoran & Yemek</option>
+          <option value="travel">✈ Seyahat & Ulaşım</option>
+          <option value="health">🏥 Eczane & Sağlık</option>
+          <option value="daily">💬 Günlük Sohbet & Tanışma</option>
+          <option value="shopping">🛍️ Alışveriş & Fiyat</option>
+          <option value="hobby">🎨 Hobi & Zaman</option>
+        </select>
+      </div>
+      <div class="quiz-config-item" id="directionConfigGroup">
+        <label for="quizDirectionSelect">Soru Yönü</label>
+        <select id="quizDirectionSelect">
+          <option value="ru_tr">🇷🇺 Rusça ➔ 🇹🇷 Türkçe</option>
+          <option value="tr_ru">🇹🇷 Türkçe ➔ 🇷🇺 Rusça</option>
+        </select>
+      </div>
+      <div class="quiz-config-item" id="questionCountGroup">
+        <label for="questionCountInput">Soru Sayısı</label>
+        <input type="number" id="questionCountInput" min="1" placeholder="Tüm Kelimeler">
+      </div>
+      <div class="quiz-config-item" id="starredCheckGroup">
+        <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="onlyStarredCheck" style="width:18px; height:18px;">
+          <span>⭐ Sadece Yıldızlı Kelimeler (<span id="starredCountSpan">0</span>)</span>
+        </label>
+      </div>
+      <button class="duo-btn duo-btn-yellow" onclick="openNotebookModal()">📓 Yıldızlı Kelimeler Defteri (<span id="starredCountSpan2">0</span>)</button>
+      <button id="startQuizBtn" class="duo-btn duo-btn-green" style="width:100%; margin-top:10px;" onclick="initQuiz()">BAŞLA ➔</button>
+    </div>
+  </div>
+
+  <div id="quiz" style="display:none;">
+    <div class="progress-header">
+      <button class="duo-btn duo-btn-gray" style="padding:6px 12px; font-size:12px;" onclick="goToHomeScreen()">✖ ÇIKIŞ</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="restartBtn" class="duo-btn duo-btn-blue" style="padding:6px 12px; font-size:12px;" onclick="restartCurrentQuiz()">🔄 TEKRAR</button>
+        <button id="wrongQuizBtn" class="duo-btn duo-btn-red" style="padding:6px 12px; font-size:12px; display:none;" onclick="startWrongQuiz()">⚠️ YANLIŞLAR (0)</button>
+      </div>
+      <span id="counter">Soru 1 / 10</span>
+      <span id="score" style="color:var(--duo-green);">Doğru: 0</span>
+    </div>
+    <div class="duo-progress-container"><div id="progressBar" class="duo-progress-bar"></div></div>
+    <div id="questionContainer">
+      <div class="word-row" id="wordRow">
+        <div id="word" class="word"></div>
+        <button id="starBtn" class="star-btn" title="Yıldızla" onclick="toggleStarCurrentWord()">⭐</button>
+        <button style="background:none; border:none; font-size:28px; cursor:pointer;" onclick="playCurrentWordAudio()">🔊</button>
+      </div>
+      <div id="flashcardArea" class="flashcard-area" style="display:none;">
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+          <div class="flashcard-face flashcard-front">
+            <div id="cardFrontText" class="flashcard-text"></div>
+            <div class="flashcard-sub">🔎 Çevirmek için tıkla</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div id="cardBackText" class="flashcard-text"></div>
+            <div class="flashcard-sub">🇹🇷 Türkçe Anlamı</div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <button class="duo-btn duo-btn-gray" onclick="prevFlashcard()">⬅ ÖNCEKİ</button>
+          <button class="duo-btn duo-btn-blue" onclick="flipCard()">🔄 ÇEVİR</button>
+          <button class="duo-btn duo-btn-green" onclick="nextFlashcard()">SONRAKİ ➔</button>
+        </div>
+      </div>
+      <button id="audioBtn" class="duo-btn duo-btn-blue" style="display:none; margin:0 auto 20px;" onclick="playSentenceMP3()">🔊 Cümleyi Dinle</button>
+      <div id="options" class="options"></div>
+    </div>
+    <div id="feedback"></div>
+    <div class="controls" id="controlsArea">
+      <button id="skipBtn" class="duo-btn duo-btn-yellow" onclick="skipQuestion()">PAS GEÇ</button>
+      <button id="next" class="duo-btn duo-btn-green" style="display:none;">DEVAM ET ➔</button>
+    </div>
+    <div id="endStats" style="text-align: center; margin-top: 20px;"></div>
+  </div>
+</div>
+<div id="notebookModal" class="notebook-modal">
+  <div class="notebook-paper">
+    <div class="notebook-header">
+      <div style="font-size:20px; font-weight:900; color:var(--duo-yellow-shadow);">⭐ Yıldızlı Kelimeler Defteri</div>
+      <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeNotebookModal()">✖</button>
+    </div>
+    <div id="notebookList" class="notebook-list"></div>
+  </div>
+</div>
+<script>
+// 860+ Kelimelik Dev Havuz
+const bigWordPool = [
+  { ru: "абсолютно", tr: "kesinlikle" }, { ru: "агентство", tr: "ajans" }, { ru: "адрес", tr: "adres" }, { ru: "активный", tr: "aktif" }, { ru: "алгоритм", tr: "algoritma" },
+  { ru: "альбом", tr: "albüm" }, { ru: "амбиция", tr: "hırs / ihtiras" }, { ru: "анализ", tr: "analiz" }, { ru: "анкета", tr: "anket" }, { ru: "аппарат", tr: "cihaz" },
+  { ru: "аренда", tr: "kira" }, { ru: "архив", tr: "arşiv" }, { ru: "аромат", tr: "aroma" }, { ru: "аэродром", tr: "havalimanı" }, { ru: "багаж", tr: "bagaj" },
+  { ru: "база", tr: "taban / üs" }, { ru: "баланс", tr: "banka / denge" }, { ru: "банк", tr: "banka" }, { ru: "барьер", tr: "engel" }, { ru: "баскетбол", tr: "basketbol" },
+  { ru: "бассейн", tr: "havuz" }, { ru: "бег", tr: "koşu" }, { ru: "беда", tr: "felaket / dert" }, { ru: "бедный", tr: "fakir" }, { ru: "белый", tr: "beyaz" },
+  { ru: "берег", tr: "sahil / kıyı" }, { ru: "беседа", tr: "sohbet" }, { ru: "бесплатно", tr: "ücretsiz" }, { ru: "билет", tr: "bilet" }, { ru: "биография", tr: "biyografi" },
+  { ru: "бизнес", tr: "iş / ticaret" }, { ru: "благодарность", tr: "minnettarlık" }, { ru: "блестящий", tr: "parlak" }, { ru: "богатый", tr: "zengin" }, { ru: "болезнь", tr: "hastalık" },
+  { ru: "больница", tr: "hastane" }, { ru: "большой", tr: "büyük" }, { ru: "боррьба", tr: "mücadele" }, { ru: "брат", tr: "erkek kardeş" }, { ru: "бюджет", "tr": "bütçe" },
+  { ru: "бумага", tr: "kağıt" }, { ru: "бутылка", tr: "şişe" }, { ru: "быстро", tr: "hızlı" }, { ru: "важный", tr: "önemli" }, { ru: "валюта", "tr": "para birimi" },
+  { ru: "ванна", tr: "banyo" }, { ru: "вариант", tr: "seçenek / varyant" }, { ru: "варенье", tr: "reçel" }, { ru: "введение", tr: "giriş" }, { ru: "вдохновение", "tr": "ilham" },
+  { ru: "век", tr: "yüzyıl / asır" }, { ru: "великий", tr: "büyük / ulu" }, { ru: "велосипед", tr: "bisiklet" }, { ru: "верность", tr: "sadakat" }, { ru: "весело", "tr": "neşeli" },
+  { ru: "весна", tr: "ilkbahar" }, { ru: "весь", tr: "bütün / tüm" }, { ru: "ветер", tr: "rüzgar" }, { ru: "вечер", tr: "akşam" }, { ru: "вещь", "tr": "eşya / şey" },
+  { ru: "взгляд", tr: "bakış" }, { ru: "взрослый", tr: "yetişkin" }, { ru: "видео", tr: "video" }, { ru: "вилка", tr: "çatal" }, { ru: "вино", "tr": "şarap" },
+  { ru: "витамин", tr: "vitamin" }, { ru: "вкус", tr: "tat / lezzet" }, { ru: "власть", tr: "iktidar / güç" }, { ru: "внимание", tr: "dikkat" }, { ru: "вода", "tr": "su" },
+  { ru: "война", tr: "savaş" }, { ru: "вокзал", tr: "gar / istasyon" }, { ru: "вопрос", tr: "soru" }, { ru: "восток", tr: "doğu" }, { ru: "врач", "tr": "doktor" },
+  { ru: "время", tr: "zaman" }, { ru: "всегда", tr: "her zaman" }, { ru: "встреча", tr: "buluşma / toplantı" }, { ru: "вторник", tr: "salı" }, { ru: "выбор", "tr": "seçim" },
+  { ru: "выставка", tr: "sergi" }, { ru: "высокий", tr: "yüksek" }, { ru: "газета", tr: "gazete" }, { ru: "гараж", tr: "garaj" }, { ru: "гвоздь", "tr": "çivi" },
+  { ru: "где", tr: "nerede" }, { ru: "герой", tr: "kahraman" }, { ru: "главный", tr: "ana / başlıca" }, { ru: "глаз", tr: "göz" }, { ru: "глубокий", "tr": "derin" },
+  { ru: "голова", tr: "kafa / baş" }, { ru: "голос", tr: "ses" }, { ru: "город", tr: "şehir" }, { ru: "горячий", tr: "sıcak" }, { ru: "гость", "tr": "misafir" },
+  { ru: "градус", tr: "derece" }, { ru: "гражданин", tr: "vatandaş" }, { ru: "громкий", tr: "gürültülü" }, { ru: "грустный", tr: "üzgün" }, { ru: "гулять", "tr": "gezinmek" },
+  { ru: "да", tr: "evet" }, { ru: "далеко", tr: "uzak" }, { ru: "данные", tr: "veri" }, { ru: "дата", tr: "tarih" }, { ru: "два", "tr": "iki" },
+  { ru: "дверь", tr: "kapı" }, { ru: "девочка", tr: "kız çocuk" }, { ru: "дедушка", tr: "dede" }, { ru: "декабрь", tr: "aralık" }, { ru: "дело", "tr": "iş" },
+  { ru: "день", tr: "gün" }, { ru: "деньги", tr: "para" }, { ru: "дерево", tr: "ağaç" }, { ru: "деревня", tr: "köy" }, { ru: "детство", "tr": "çocukluk" },
+  { ru: "диван", tr: "kanepe" }, { ru: "директор", tr: "müdür" }, { ru: "диск", "tr": "disk" }, { ru: "длина", tr: "uzunluk" }, { ru: "дождь", "tr": "yağmur" },
+  { ru: "долг", tr: "borç / görev" }, { ru: "дом", tr: "ev" }, { ru: "дорога", tr: "yol" }, { ru: "доска", tr: "tahta" }, { ru: "дочь", "tr": "kız evlat" },
+  { ru: "драма", tr: "dram" }, { ru: "друг", tr: "arkadaş" }, { ru: "душа", tr: "ruh" }, { ru: "дым", tr: "duman" }, { ru: "дядя", "tr": "amca" },
+  { ru: "евро", tr: "euro" }, { ru: "еда", tr: "yemek" }, { ru: "ежедневно", tr: "günlük olarak" }, { ru: "ел", tr: "yedi" }, { ru: "емкость", "tr": "kapasite" },
+  { ru: "если", tr: "eğer" }, { ru: "естественный", tr: "doğal" }, { ru: "жаль", tr: "yazık" }, { ru: "жаркий", tr: "sıcak" }, { ru: "ждать", "tr": "beklemek" },
+  { ru: "желание", tr: "istek" }, { ru: "железо", tr: "demir" }, { ru: "женщина", tr: "kadın" }, { ru: "живот", tr: "karın" }, { ru: "жизнь", "tr": "hayat" },
+  { ru: "жир", tr: "yağ" }, { ru: "журнал", tr: "dergi" }, { ru: "завод", tr: "fabrika" }, { ru: "завтра", tr: "yarın" }, { ru: "задача", "tr": "görev / problem" },
+  { ru: "казнь", tr: "idam" }, { ru: "капля", tr: "damla" }, { ru: "капуста", tr: "lahana" }, { ru: "карандаш", tr: "kurşun kalem" }, { ru: "карта", "tr": "harita" },
+  { ru: "касса", tr: "kasa" }, { ru: "качество", tr: "kalite" }, { ru: "квартира", tr: "daire" }, { ru: "кепка", tr: "şapka" }, { ru: "кино", "tr": "sinema" },
+  { ru: "кислород", tr: "oksijen" }, { ru: "клавиатура", tr: "klavye" }, { ru: "класс", tr: "sınıf" }, { ru: "клетка", tr: "kafes / hücre" }, { ru: "клуб", "tr": "kulüp" },
+  { ru: "книга", tr: "kitap" }, { ru: "кнопка", tr: "düğme / tuş" }, { ru: "ковёр", tr: "halı" }, { ru: "когда", tr: "ne zaman" }, { ru: "кожа", "tr": "deri" },
+  { ru: "койка", tr: "yatak" }, { ru: "колесо", tr: "tekerlek" }, { ru: "коллекция", tr: "koleksiyon" }, { ru: "команда", tr: "takım / komut" }, { ru: "комната", "tr": "oda" },
+  { ru: "компания", tr: "şirket" }, { ru: "компьютер", tr: "bilgisayar" }, { ru: "конкурс", tr: "yarışma" }, { ru: "конец", tr: "son" }, { ru: "концерт", "tr": "konser" },
+  { ru: "корова", tr: "inek" }, { ru: "коробка", tr: "kutu" }, { ru: "короткий", tr: "kısa" }, { ru: "костюм", tr: "takım elbise" }, { ru: "кошка", "tr": "kedi" },
+  { ru: "край", tr: "kenar / ülke" }, { ru: "красивый", tr: "güzel" }, { ru: "красный", tr: "kırmızı" }, { ru: "кредит", tr: "kredi" }, { ru: "кресло", "tr": "koltuk" },
+  { ru: "кризис", tr: "kriz" }, { ru: "кровь", tr: "kan" }, { ru: "кроссовки", tr: "spor ayakkabı" }, { ru: "круг", tr: "daire" }, { ru: "кружка", "tr": "kupa" },
+  { ru: "крыша", tr: "çatı" }, { ru: "кухня", tr: "mutfak" }, { ru: "лаборатория", tr: "laboratuvar" }, { ru: "лампа", tr: "lamba" }, { ru: "легенда", "tr": "efsane" },
+  { ru: "лед", tr: "buz" }, { ru: "лекарство", tr: "ilaç" }, { ru: "ленивый", tr: "tembel" }, { ru: "лес", tr: "orman" }, { ru: "летать", "tr": "uçmak" },
+  { ru: "лето", tr: "yaz" }, { ru: "летчик", tr: "pilot" }, { ru: "лимон", tr: "limon" }, { ru: "линия", tr: "çizgi" }, { ru: "листья", "tr": "yapraklar" },
+  { ru: "лицо", tr: "yüz" }, { ru: "лодка", tr: "sandal" }, { ru: "ложка", tr: "kaşık" }, { ru: "лучший", tr: "en iyi" }, { ru: "любовь", "tr": "aşk" },
+  { ru: "люди", tr: "insanlar" }, { ru: "магазин", tr: "mağaza" }, { ru: "майка", tr: "tişört" }, { ru: "мальчик", tr: "oğlan çocuk" }, { ru: "мама", "tr": "anne" },
+  { ru: "маршрут", tr: "güzergah" }, { ru: "масло", tr: "tereyağı / sıvı yağ" }, { ru: "мастер", tr: "usta" }, { ru: "математика", tr: "matematik" }, { ru: "машина", "tr": "araba" },
+  { ru: "медведь", tr: "ayı" }, { ru: "медицина", tr: "tıp" }, { ru: "международный", tr: "uluslararası" }, { ru: "мелкий", tr: "ufak / sığ" }, { ru: "мелодия", "tr": "melodi" },
+  { ru: "меньше", tr: "daha az" }, { ru: "мероприятие", tr: "etkinlik" }, { ru: "место", tr: "yer" }, { ru: "металл", tr: "metal" }, { ru: "метро", "tr": "metro" },
+  { ru: "мечта", tr: "hayal" }, { ru: "миг", tr: "an" }, { ru: "милиция", tr: "polis" }, { ru: "миллион", tr: "milyon" }, { ru: "минута", "tr": "dakika" },
+  { ru: "мир", tr: "dünya / barış" }, { ru: "мнение", tr: "fikir" }, { ru: "модныи", tr: "modaya uygun" }, { ru: "мозг", tr: "beyin" }, { ru: "молодец", "tr": "aferin" },
+  { ru: "молодой", tr: "genç" }, { ru: "молоко", tr: "süt" }, { ru: "море", tr: "deniz" }, { ru: "мост", tr: "köprü" }, { ru: "мощный", "tr": "güçlü" },
+  { ru: "музей", tr: "müze" }, { ru: "музыка", tr: "müzik" }, { ru: "мука", tr: "un" }, { ru: "муж", tr: "koca" }, { ru: "мыло", "tr": "sabun" },
+  { ru: "мясо", tr: "et" }, { ru: "награда", tr: "ödül" }, { ru: "надежда", tr: "umut" }, { ru: "назад", "tr": "geri" }, { ru: "название", "tr": "isim / ad" },
+  { ru: "найсти", tr: "bulmak" }, { ru: "напиток", tr: "içecek" }, { ru: "народ", tr: "halk" }, { ru: "население", tr: "nüfus" }, { ru: "наука", "tr": "bilim" },
+  { ru: "начало", tr: "başlangıç" }, { ru: "наш", tr: "bizim" }, { ru: "небо", tr: "gökyüzü" }, { ru: "неделя", tr: "hafta" }, { ru: "немецкий", "tr": "almanca" },
+  { ru: "ненависть", tr: "nefret" }, { ru: "необычный", tr: "sıradışı" }, { ru: "нервный", tr: "sinirli" }, { ru: "нефть", tr: "petrol" }, { ru: "нигде", "tr": "hiçbir yerde" },
+  { ru: "низкий", tr: "alçak" }, { ru: "никакой", tr: "hiçbir" }, { ru: "никто", tr: "hiç kimse" }, { ru: "новости", tr: "haberler" }, { ru: "нога", "tr": "bacak" },
+  { ru: "нож", tr: "bıçak" }, { ru: "номер", tr: "numara" }, { ru: "нос", tr: "burun" }, { ru: "ночь", tr: "gece" }, { ru: "нужный", "tr": "gerekli" },
+  { ru: "оазис", tr: "vaha" }, { ru: "обида", tr: "küskünlük" }, { ru: "облако", tr: "bulut" }, { ru: "обман", tr: "hile" }, { ru: "оборудование", "tr": "ekipman" },
+  { ru: "образ", tr: "biçim / imaj" }, { ru: "обучение", tr: "eğitim" }, { ru: "общество", tr: "toplum" }, { ru: "общий", tr: "ortak" }, { ru: "обычно", "tr": "genellikle" },
+  { ru: "овощ", tr: "sebze" }, { ru: "огонь", tr: "ateş" }, { ru: "огромный", tr: "devasa" }, { ru: "одежда", tr: "kıyafet" }, { ru: "океан", "tr": "okyanus" },
+  { ru: "окно", tr: "pencere" }, { ru: "около", tr: "civarında" }, { ru: "окунь", tr: "levrek" }, { ru: "он", tr: "o" }, { ru: "операция", "tr": "ameliyat / operasyon" },
+  { ru: "описание", tr: "açıklama" }, { ru: "опыт", tr: "deneyim" }, { ru: "оратор", tr: "hatip" }, { ru: "организм", tr: "organizma" }, { ru: "орех", "tr": "ceviz" },
+  { ru: "оркестр", tr: "orkestra" }, { ru: "оружие", tr: "silah" }, { ru: "осень", tr: "sonbahar" }, { ru: "остров", tr: "ada" }, { ru: "ответ", "tr": "cevap" },
+  { ru: "отец", tr: "baba" }, { ru: "отдых", tr: "dinlenme" }, { ru: "открытка", tr: "kartpostal" }, { ru: "ошибка", tr: "hata" }, { ru: "палатка", "tr": "çadır" },
+  { ru: "палец", tr: "parmak" }, { ru: "память", tr: "hafıza" }, { ru: "папа", tr: "baba" }, { ru: "парк", tr: "park" }, { ru: "паспорт", "tr": "pasaport" },
+  { ru: "пациент", tr: "hasta" }, { ru: "пейзаж", tr: "manzara" }, { ru: "пенсия", tr: "emeklilik" }, { ru: "первый", tr: "birinci" }, { ru: "перевод", "tr": "çeviri" },
+  { ru: "песня", tr: "şarkı" }, { ru: "песок", tr: "kum" }, { ru: "печенье", "tr": "kurabiye" }, { ru: "пиво", tr: "bira" }, { ru: "письмо", "tr": "mektup" },
+  { ru: "питание", tr: "beslenme" }, { ru: "планета", tr: "gezegen" }, { ru: "платье", tr: "elbise" }, { ru: "плечо", tr: "omuz" }, { ru: "площадь", "tr": "meydan" },
+  { ru: "победа", tr: "zafer" }, { ru: "погода", tr: "hava" }, { ru: "подарок", tr: "hediye" }, { ru: "поезд", tr: "tren" }, { ru: "поиск", "tr": "arama" },
+  { ru: "поколение", tr: "nesil" }, { ru: "поле", tr: "tarla" }, { ru: "полиция", tr: "polis" }, { ru: "полка", tr: "raf" }, { ru: "помидор", "tr": "domates" },
+  { ru: "помощь", tr: "yardım" }, { ru: "понедельник", tr: "pazartesi" }, { ru: "понимание", tr: "anlayış" }, { ru: "порт", tr: "liman" }, { ru: "порядок", "tr": "düzen" },
+  { ru: "постель", tr: "yatak" }, { ru: "посуда", tr: "bulaşık" }, { ru: "потолок", tr: "tavan" }, { ru: "почта", tr: "posta" }, { ru: "правда", "tr": "gerçek" },
+  { ru: "праздник", tr: "bayram" }, { ru: "президент", tr: "başkan" }, { ru: "привет", tr: "selam" }, { ru: "природа", tr: "doğa" }, { ru: "проблема", "tr": "sorun" },
+  { ru: "продукт", tr: "ürün" }, { ru: "прошлое", tr: "geçmiş" }, { ru: "птица", tr: "kuş" }, { ru: "путь", tr: "yol" }, { ru: "работа", "tr": "çalışma / iş" },
+  { ru: "рад", tr: "memnun" }, { ru: "радио", tr: "radyo" }, { ru: "радость", tr: "sevinç" }, { ru: "разговор", tr: "konuşma" }, { ru: "район", "tr": "semt / bölge" },
+  { ru: "ранний", tr: "erken" }, { ru: "рассказ", tr: "hikaye" }, { ru: "ребенок", tr: "çocuk" }, { ru: "река", tr: "nehir" }, { ru: "решение", "tr": "karar" },
+  { ru: "рис", tr: "pirinç" }, { ru: "родители", tr: "ebeveynler" }, { ru: "рождение", tr: "doğum" }, { ru: "роза", tr: "gül" }, { ru: "рот", "tr": "ağız" },
+  { ru: "рука", tr: "el" }, { ru: "рубль", tr: "ruble" }, { ru: "русский", tr: "rus" }, { ru: "рыба", tr: "balık" }, { ru: "рынок", "tr": "pazar" },
+  { ru: "сад", tr: "bahçe" }, { ru: "салат", tr: "salata" }, { ru: "самолет", tr: "uçak" }, { ru: "сахар", tr: "şeker" }, { ru: "свет", "tr": "ışık" },
+  { ru: "свобода", tr: "özgürlük" }, { ru: "север", tr: "kuzey" }, { ru: "сегодня", tr: "bugün" }, { ru: "секрет", tr: "sır" }, { ru: "семья", "tr": "aile" },
+  { ru: "сентимент", tr: "dugusallık" }, { ru: "сердце", tr: "kalp" }, { ru: "серебро", "tr": "gümüş" }, { ru: "сестра", tr: "kız kardeş" }, { ru: "сильный", "tr": "güçlü" },
+  { ru: "символ", tr: "sembol" }, { ru: "синий", tr: "mavi" }, { ru: "система", tr: "sistem" }, { ru: "сказка", tr: "masal" }, { ru: "скрипка", "tr": "keman" },
+  { ru: "скучно", tr: "sıkıcı" }, { ru: "сладкий", tr: "tatlı" }, { ru: "слово", tr: "kelime" }, { ru: "случай", "tr": "durum / olay" }, { ru: "смерть", "tr": "ölüm" },
+  { ru: "снег", tr: "kar" }, { ru: "собака", tr: "köpek" }, { ru: "событие", tr: "olay" }, { ru: "солнце", tr: "güneş" }, { ru: "соль", "tr": "tuz" },
+  { ru: "сон", tr: "rüya / uyku" }, { ru: "сосед", tr: "komşu" }, { ru: "спорт", tr: "spor" }, { ru: "спокойно", tr: "sakin" }, { ru: "справедливость", "tr": "adalet" },
+  { ru: "среда", tr: "çarşamba / çevre" }, { ru: "стакан", tr: "bardak" }, { ru: "станция", tr: "istasyon" }, { ru: "стена", tr: "duvar" }, { ru: "стиль", "tr": "stil" },
+  { ru: "стол", tr: "masa" }, { ru: "страна", tr: "ülke" }, { ru: "страх", tr: "korku" }, { ru: "студент", tr: "öğrenci" }, { ru: "стул", "tr": "sandalye" },
+  { ru: "суббота", tr: "cumartesi" }, { ru: "сумка", tr: "çanta" }, { ru: "суп", tr: "çorba" }, { ru: "сутки", tr: "gün (24 saat)" }, { ru: "счастье", "tr": "mutluluk" },
+  { ru: "сын", tr: "oğul" }, { ru: "сыр", tr: "peynir" }, { ru: "таблица", tr: "tablo" }, { ru: "такси", "tr": "taksi" }, { ru: "талант", "tr": "yetenek" },
+  { ru: "тарелка", tr: "tabak" }, { ru: "театр", tr: "tiyatro" }, { ru: "телевизор", tr: "televizyon" }, { ru: "телефон", tr: "telefon" }, { ru: "темный", "tr": "karanlık" },
+  { ru: "температура", tr: "sıcaklık" }, { ru: "теннис", tr: "tenis" }, { ru: "теория", tr: "teori" }, { ru: "тепло", tr: "ılık / sıcaklık" }, { ru: "терпение", "tr": "sabır" },
+  { ru: "только", tr: "sadece" }, { ru: "том", tr: "cilt" }, { ru: "тот", tr: "o" }, { ru: "трава", tr: "çim" }, { ru: "традиция", "tr": "gelenek" },
+  { ru: "транспорт", tr: "ulaşım" }, { ru: "тренер", "tr": "antrenör" }, { ru: "три", tr: "üç" }, { ru: "троллейбус", "tr": "troleybüs" }, { ru: "труд", "tr": "emek" },
+  { ru: "трудный", tr: "zor" }, { ru: "туман", tr: "sis" }, { ru: "турист", tr: "turist" }, { ru: "тысяча", tr: "bin" }, { ru: "тяжелый", "tr": "ağır" },
+  { ru: "убеждение", tr: "inanç" }, { ru: "убийство", tr: "cinayet" }, { ru: "уважение", tr: "saygı" }, { ru: "углерод", tr: "karbon" }, { ru: "угроза", "tr": "tehdit" },
+  { ru: "удача", tr: "şans" }, { ru: "ужин", tr: "akşam yemeği" }, { ru: "узел", tr: "düğüm" }, { ru: "улица", tr: "sokak" }, { ru: "улыбка", "tr": "gülümseme" },
+  { ru: "университет", tr: "üniversite" }, { ru: "управление", tr: "yönetim" }, { ru: "урок", tr: "ders" }, { ru: "успех", tr: "başarı" }, { ru: "утро", "tr": "sabah" },
+  { ru: "ученый", tr: "bilim insanı" }, { ru: "фабрика", tr: "fabrika" }, { ru: "фамилия", tr: "soyadı" }, { ru: "февраль", tr: "şubat" }, { ru: "ферма", "tr": "çiftlik" },
+  { ru: "фигура", tr: "figür" }, { ru: "фильм", tr: "film" }, { ru: "фирма", "tr": "firma" }, { ru: "флаг", tr: "bayrak" }, { ru: "фрукты", "tr": "meyveler" },
+  { ru: "футбол", tr: "futbol" }, { ru: "характер", tr: "karakter" }, { ru: "химия", "tr": "kimya" }, { ru: "хлеб", tr: "ekek" }, { ru: "хлопок", "tr": "pamuk" },
+  { ru: "художник", tr: "ressam" }, { ru: "царь", tr: "çar" }, { ru: "цвет", tr: "renk" }, { ru: "цель", tr: "hedef" }, { ru: "цена", "tr": "fiyat" },
+  { ru: "центр", tr: "merkez" }, { ru: "цепь", tr: "zincir" }, { ru: "церковь", tr: "kilise" }, { ru: "чай", tr: "çay" }, { ru: "человек", "tr": "insan" },
+  { ru: "чемпион", tr: "şampiyon" }, { ru: "чемодан", tr: "valiz" }, { ru: "честное", tr: "dürüst" }, { ru: "четверг", tr: "perşembe" }, { ru: "число", "tr": "sayı" },
+  { ru: "читать", tr: "okumak" }, { ru: "член", tr: "üye" }, { ru: "чудо", tr: "mucize" }, { ru: "шаг", tr: "adım" }, { ru: "шапка", "tr": "bere" },
+  { ru: "шарик", tr: "top" }, { ru: "школа", tr: "okul" }, { ru: "шляпа", tr: "şapka" }, { ru: "шоколад", tr: "çikolata" }, { ru: "штаб", "tr": "karargah" },
+  { ru: "шум", tr: "gürültü" }, { ru: "шутка", tr: "şaka" }, { ru: "щека", tr: "yanak" }, { ru: "щи", tr: "lahana çorbası" }, { ru: "эволюция", "tr": "evrim" },
+  { ru: "экзамен", tr: "sınav" }, { ru: "эконом", tr: "ekonomi" }, { ru: "экран", "tr": "ekran" }, { ru: "электричество", tr: "elektrik" }, { ru: "энергия", "tr": "enerji" },
+  { ru: "эпоха", tr: "dönem" }, { ru: "этаж", "tr": "kat" }, { ru: "эффект", tr: "etki" }, { ru: "юг", tr: "güney" }, { ru: "юмор", "tr": "mizah" },
+  { ru: "яблоко", tr: "elma" }, { ru: "явление", tr: "olgu" }, { ru: "язык", tr: "dil" }, { ru: "яйцо", tr: "yumurta" }, { ru: "январь", "tr": "ocak" },
+  { ru: "ярмарка", tr: "panayır" }, { ru: "ясный", tr: "açık / net" }, { ru: "ящик", tr: "kutu / sandık" },
+  { ru: "абстрактный", tr: "soyut" }, { ru: "авангард", tr: "avangard" }, { ru: "автобиография", tr: "otobiyografi" }, { ru: "автограф", tr: "imza" }, { ru: "авторитет", tr: "otorite" },
+  { ru: "агрессивный", tr: "agresif" }, { ru: "адвокат", tr: "avukat" }, { ru: "администрация", tr: "yönetim" }, { ru: "академия", tr: "akademi" }, { ru: "активист", tr: "aktivist" },
+  { ru: "акционер", tr: "ortak" }, { ru: "акула", tr: "köpekbalığı" }, { ru: "алкоголь", tr: "alkol" }, { ru: "альпинизм", tr: "dağcılık" }, { ru: "амбассадор", tr: "büyükelçi" },
+  { ru: "аморальный", tr: "ahlaksız" }, { ru: "амплитуда", tr: "genlik" }, { ru: "амулет", tr: "muska" }, { ru: "аналогия", tr: "benzetme" }, { ru: "анархия", tr: "anarşi" },
+  { ru: "анекдот", tr: "fıkra" }, { ru: "анимация", tr: "animasyon" }, { ru: "аноним", tr: "anonim" }, { ru: "антенна", tr: "anten" }, { ru: "апатия", tr: "apati" },
+  { ru: "апельсин", tr: "portakal" }, { ru: "аппетит", tr: "iştah" }, { ru: "апрель", "tr": "nisan" }, { ru: "аристократ", tr: "aristokrat" }, { ru: "армия", "tr": "ordu" },
+  { ru: "ароматизатор", tr: "aroma verici" }, { ru: "артист", tr: "sanatçı" }, { ru: "архитектор", tr: "mimar" }, { ru: "аспирант", tr: "doktora öğrencisi" }, { ru: "астроном", "tr": "gökbilimci" },
+  { ru: "атака", tr: "saldırı" }, { ru: "атлас", tr: "atlas" }, { ru: "атмосфера", tr: "atmosfer" }, { ru: "атом", tr: "atom" }, { ru: "аудитория", "tr": "dinleyici kitlesi" },
+  { ru: "афиша", tr: "afiş" }, { ru: "аэропорт", tr: "havalimanı" }, { ru: "багажник", tr: "bagaj" }, { ru: "багряный", tr: "kızıl" }, { ru: "базар", "tr": "çarşı" },
+  { ru: "байка", tr: "hikaye" }, { ru: "бак", tr: "depo" }, { ru: "бактерия", tr: "bakteri" }, { ru: "балет", tr: "bale" }, { ru: "балкон", "tr": "balkon" },
+  { ru: "банда", tr: "çete" }, { ru: "бантик", tr: "kurdele" }, { ru: "бар", tr: "bar" }, { ru: "бархат", tr: "kadife" }, { ru: "бассейн", "tr": "havuz" },
+  { ru: "башня", tr: "kule" }, { ru: "беглец", tr: "kaçak" }, { ru: "беда", tr: "keder" }, { ru: "безработица", tr: "işsizlik" }, { ru: "бейзбол", "tr": "beyzбол" },
+  { ru: "белка", tr: "sincap" }, { ru: "белок", tr: "protein" }, { ru: "бензин", tr: "benzin" }, { ru: "беременность", tr: "gebelik" }, { ru: "беседа", "tr": "söyleşi" },
+  { ru: "бессонница", tr: "uykusuzluk" }, { ru: "бешенство", tr: "kuduz" }, { ru: "библиотека", tr: "kütüphane" }, { ru: "билет", tr: "bilet" }, { ru: "бинокль", "tr": "dürbün" },
+  { ru: "биография", tr: "yaşam öyküsü" }, { ru: "биолог", tr: "biyolog" }, { ru: "биржа", tr: "borsa" }, { ru: "бисквит", tr: "bisküvi" }, { ru: "благополучие", "tr": "refah" },
+  { ru: "блокнот", tr: "not defteri" }, { ru: "блондин", tr: "sarışın" }, { ru: "боб", tr: "fasulye" }, { ru: "богач", tr: "zengin" }, { ru: "боец", "tr": "savaşçı" },
+  { ru: "бокал", tr: "kadeh" }, { ru: "бокс", tr: "boks" }, { ru: "болото", tr: "bataklık" }, { ru: "бомба", tr: "bomba" }, { ru: "борщ", "tr": "pancar çorbası" },
+  { ru: "босс", tr: "patron" }, { ru: "боцман", tr: "bostancı" }, { ru: "брак", tr: "evlilik / kusur" }, { ru: "браслет", tr: "bilezik" }, { ru: "бред", "tr": "sayıklama" },
+  { ru: "бревно", tr: "kütük" }, { ru: "бригада", "tr": "tugay / ekip" }, { ru: "бриллиант", tr: "pırlanta" }, { ru: "брови", tr: "kaşlar" }, { ru: "броня", "tr": "zırh" },
+  { ru: "брусника", tr: "yaban mersini" }, { ru: "брюки", tr: "pantolon" }, { ru: "будильник", tr: "çalar saat" }, { ru: "букварь", tr: "alfabe kitabı" }, { ru: "бульвар", "tr": "bulvar" },
+  { ru: "бумага", tr: "kağıt" }, { ru: "бункер", tr: "sığınak" }, { ru: "буржуазия", tr: "burjuvazi" }, { ru: "буря", tr: "fırtına" }, { ru: "бутерброд", "tr": "sandviç" },
+  { ru: "буфон", tr: "palyaço" }, { ru: "бюджет", tr: "bütçe" }, { ru: "бюро", tr: "büro" }, { ru: "вагон", tr: "vagon" }, { ru: "ваза", "tr": "vazo" },
+  { ru: "вакцина", tr: "aşı" }, { ru: "вал", tr: "mil / dalga" }, { ru: "варежки", tr: "elden" }, { ru: "варенье", tr: "reçel" }, { ru: "вас", "tr": "sizi" },
+  { ru: "ваучер", tr: "kupon" }, { ru: "введение", tr: "giriş" }, { ru: "вдох", tr: "nefes alma" }, { ru: "ведро", tr: "kova" }, { ru: "ведьма", "tr": "cadı" },
+  { ru: "вежливость", tr: "nezaket" }, { ru: "везде", tr: "her yerde" }, { ru: "великан", tr: "dev" }, { ru: "величие", tr: "ihtişam" }, { ru: "вельвет", "tr": "kadife" },
+  { ru: "венец", tr: "taç" }, { ru: "вентилятор", tr: "vantilatör" }, { ru: "веранда", tr: "veranda" }, { ru: "верблюд", tr: "deve" }, { ru: "веревка", "tr": "ip" },
+  { ru: "верность", tr: "sadakat" }, { ru: "вертолёт", tr: "helikopter" }, { ru: "верхушка", tr: "zirve" }, { ru: "веселье", tr: "eğlence" }, { ru: "вестник", "tr": "haberci" },
+  { ru: "ветеринар", tr: "veteriner" }, { ru: "ветка", tr: "dal" }, { ru: "вечность", tr: "sonsuzluk" }, { ru: "вешалка", tr: "askılık" }, { ru: "взаимность", "tr": "karşılıklık" },
+  { ru: "вибрация", tr: "titreşim" }, { ru: "видеокамера", tr: "video kamera" }, { ru: "визитка", tr: "kartvizit" }, { ru: "винт", tr: "vida" }, { ru: "вирус", "tr": "virüs" },
+  { ru: "вишня", tr: "vişne" }, { ru: "вклад", tr: "katkı / mevduat" }, { ru: "вкусный", tr: "lezzetli" }, { ru: "владение", tr: "mülk" }, { ru: "влажность", "tr": "nem" },
+  { ru: "влечение", tr: "çekim" }, { ru: "внимание", tr: "dikkat" }, { ru: "войско", tr: "askeri birlik" }, { ru: "волк", tr: "kurt" }, { ru: "волна", "tr": "dalga" },
+  { ru: "волосы", tr: "saç" }, { ru: "вонючий", tr: "kötü kokulu" }, { ru: "воодушевление", tr: "coşku" }, { ru: "вопрос", tr: "soru" }, { ru: "воробей", "tr": "serçe" },
+  { ru: "ворота", tr: "kapı / kale" }, { ru: "воскресенье", tr: "pazar" }, { ru: "восток", tr: "doğu" }, { ru: "восход", tr: "gün doğumu" }, { ru: "воцкать", "tr": "bağırmak" },
+  { ru: "впечатление", tr: "izlenim" }, { ru: "враг", tr: "düşman" }, { ru: "вращение", tr: "dönme" }, { ru: "время", tr: "zaman" }, { ru: "вселенная", "tr": "evren" },
+  { ru: "вспышка", tr: "parlama" }, { ru: "встреча", tr: "buluşma" }, { ru: "вторжение", tr: "istila" }, { ru: "вулкан", tr: "yanardağ" }, { ru: "выбор", "tr": "seçim" },
+  { ru: "вывод", tr: "sonuç" }, { ru: "выгода", tr: "kar / çıkar" }, { ru: "выставка", tr: "sergi" }, { ru: "высота", tr: "yükseklik" }, { ru: "выход", "tr": "çıkış" }
+];
+
+// 307 Kelimelik Ünite Verisi
+const unit123Data = [
+  { ru: "авто́бус", tr: "Otobüs" }, { ru: "бана́н", tr: "Muz" }, { ru: "брат", tr: "Erkek kardeş" }, { ru: "бу́ква", tr: "Harf" }, { ru: "бума́га", tr: "Kağıt" },
+  { ru: "вода́", tr: "Su" }, { ru: "вопро́с", tr: "Soru" }, { ru: "врач", tr: "Doktor" }, { ru: "глаз", tr: "Göz" }, { ru: "голова́", tr: "Baş / Kafa" },
+  { ru: "го́род", tr: "Şehir" }, { ru: "да", tr: "Evet" }, { ru: "доска́", tr: "Tahta" }, { ru: "дом", tr: "Ev" }, { ru: "доро́га", tr: "Yol" },
+  { ru: "друг", tr: "Erkek arkadaş / Dost" }, { ru: "журна́л", tr: "Dergi" }, { ru: "звук", tr: "Ses" }, { ru: "зонт", tr: "Şemsiye" }, { ru: "и", tr: "Ve" },
+  { ru: "каранда́ш", tr: "Kurşun kalem" }, { ru: "карта", tr: "Harita" }, { ru: "кни́га", tr: "Kitap" }, { ru: "комна́та", tr: "Oda" }, { ru: "ко́шка", tr: "Kedi" },
+  { ru: "красота́", tr: "Güzellik" }, { ru: "кури́ца", tr: "Tavuk" }, { ru: "ла́мпа", tr: "Lamba" }, { ru: "лицо́", tr: "Yüz" }, { ru: "луна́", tr: "Ay" },
+  { ru: "мать", tr: "Anne" }, { ru: "маши́на", tr: "Araba" }, { ru: "ме́сто", tr: "Yer" }, { ru: "молоко́", tr: "Süt" }, { ru: "муж", tr: "Koca / Eş" },
+  { ru: "мужчи́на", tr: "Erkek" }, { ru: "мэнэ́", tr: "Ben" }, { ru: "наро́д", tr: "Halk" }, { ru: "небо", tr: "Gökyüzü" }, { ru: "нет", tr: "Hayır" },
+  { ru: "нога́", tr: "Bacak / Ayak" }, { ru: "нож", tr: "Bıçak" }, { ru: "но́мер", tr: "Numara / Oda numarası" }, { ru: "нос", tr: "Burun" }, { ru: "ночь", tr: "Gece" },
+  { ru: "окно́", tr: "Pencere" }, { ru: "оте́ц", tr: "Baba" }, { ru: "очко́", tr: "Gözlük" }, { ru: "па́пка", tr: "Dosya" }, { ru: "парк", tr: "Park" },
+  { ru: "письмо́", tr: "Mektup" }, { ru: "план", tr: "Plan" }, { ru: "по́ле", tr: "Tarla / Alan" }, { ru: "пол", tr: "Zemin / Yer" }, { ru: "помо́щь", tr: "Yardım" },
+  { ru: "портфе́ль", tr: "Evrak çantası" }, { ru: "потоло́к", tr: "Tavan" }, { ru: "правда", tr: "Doğru / Gerçek" }, { ru: "пра́здник", tr: "Bayram / Kutlama" }, { ru: "предме́т", tr: "Nesne / Konu" },
+  { ru: "прия́тель", tr: "Arkadaş" }, { ru: "пти́ца", tr: "Kuş" }, { ru: "ра́дио", tr: "Radyo" }, { ru: "ребёнок", tr: "Çocuk" }, { ru: "река́", tr: "Nehir" },
+  { ru: "рису́нок", tr: "Resim / Çizim" }, { ru: "роди́тели", tr: "Ebeveynler" }, { ru: "розыгрыш", tr: "Şaka / Kura" }, { ru: "рот", tr: "Ağız" }, { ru: "рука́", tr: "El / Kol" },
+  { ru: "ру́чка", tr: "Tükenmez kalem / Kol" }, { ru: "ры́ба", tr: "Balık" }, { ru: "сад", tr: "Bahçe" }, { ru: "сала́т", tr: "Salata" }, { ru: "самолёт", tr: "Uçak" },
+  { ru: "са́хар", tr: "Şeker" }, { ru: "свет", tr: "Işık / Dünya" }, { ru: "семья́", tr: "Aile" }, { ru: "сестра́", tr: "Kız kardeş" }, { ru: "сигаре́та", tr: "Sigara" },
+  { ru: "слово", tr: "Kelime / Sözcük" }, { ru: "соба́ка", tr: "Köpek" }, { ru: "со́лнце", tr: "Güneş" }, { ru: "соль", tr: "Tuz" }, { ru: "спорт", tr: "Spor" },
+  { ru: "стака́н", tr: "Bardak" }, { ru: "стенка", tr: "Duvar" }, { ru: "стол", tr: "Masa" }, { ru: "стул", tr: "Sandalye" }, { ru: "су́мка", tr: "Çanta" },
+  { ru: "сыр", tr: "Peynir" }, { ru: "театра́", tr: "Tiyatro" }, { ru: "телеви́зор", tr: "Televizyon" }, { ru: "телефон", tr: "Telefon" }, { ru: "тетра́дь", tr: "Defter" },
+  { ru: "тигр", tr: "Kaplan" }, { ru: "то́лько", tr: "Sadece" }, { ru: "трава́", tr: "Çim / Ot" }, { ru: "треть", tr: "Üçte bir" }, { ru: "у́лица", tr: "Sokak / Cadde" },
+  { ru: "университе́т", tr: "Üniversite" }, { ru: "урок", tr: "Ders" }, { ru: "утро", tr: "Sabah" }, { ru: "фами́лия", tr: "Soyadı" }, { ru: "фильм", tr: "Film" },
+  { ru: "фото", tr: "Fotoğraf" }, { ru: "фрукт", tr: "Meyve" }, { ru: "хлеб", tr: "Ekmek" }, { ru: "хорошо́", tr: "İyi" }, { ru: "цвет", tr: "Renk" },
+  { ru: "цель", tr: "Amaç / Hedef" }, { ru: "чай", tr: "Çay" }, { ru: "челове́к", tr: "İnsan / Adam" }, { ru: "число́", tr: "Sayı / Tarih" }, { ru: "шко́ла", tr: "Okul" },
+  { ru: "шко́льник", tr: "Öğrenci" }, { ru: "шля́па", tr: "Şapka" }, { ru: "шутка", tr: "Şaka" }, { ru: "электри́чество", tr: "Elektrik" }, { ru: "я́блоко", tr: "Elma" },
+  { ru: "я́зык", tr: "Dil" }, { ru: "яйцо́", tr: "Yumurta" }, { ru: "де́вушка", tr: "Genç kız / Hanımefendi" }, { ru: "женщина", tr: "Kadın" }, { ru: "парень", tr: "Genç erkek / Delikanlı" },
+  { ru: "девочка", tr: "Küçük kız" }, { ru: "мальчик", tr: "Erkek çocuk" }, { ru: "бабушка", tr: "Büyükanne / Nine" }, { ru: "дедушка", tr: "Büyükbaba / Dede" }, { ru: "родители", tr: "Ebeveynler" },
+  { ru: "дядя", tr: "Amca / Dayı" }, { ru: "тетя", tr: "Teyze / Hala" }, { ru: "племянник", tr: "Erkek yeğen" }, { ru: "племянница", tr: "Kız yeğen" }, { ru: "внук", tr: "Erkek torun" },
+  { ru: "внучка", tr: "Kız torun" }, { ru: "зять", tr: "Damat / Enişte" }, { ru: "невестка", tr: "Gelin" }, { ru: "свекровь", tr: "Kaynana (eşin annesi)" }, { ru: "тесть", tr: "Kayınpeder (eşin babası)" },
+  { ru: "теща", tr: "Kaynana (eşin annesi)" }, { ru: "шурин", tr: "Kayınbirader" }, { ru: "золовка", tr: "Görümce" }, { ru: "сват", tr: "Dünür" }, { ru: "сватья", tr: "Dünür kadın" },
+  { ru: "кум", tr: "Küm / Kirve" }, { ru: "кума", tr: "Küm kadın" }, { ru: "малыш", tr: "Bebek / Ufaklık" }, { ru: "младенец", tr: "Yeni doğan bebek" }, { ru: "подросток", tr: "Ergen / Genç" },
+  { ru: "взрослый", tr: "Yetişkin" }, { ru: "старик", tr: "Yaşlı adam" }, { ru: "старуха", tr: "Yaşlı kadın" }, { ru: "сосед", tr: "Komşu (erkek)" }, { ru: "соседка", tr: "Komşu (kadın)" },
+  { ru: "гость", tr: "Misafir" }, { ru: "гостья", tr: "Kadın misafir" }, { ru: "хозяин", tr: "Ev sahibi / Patron" }, { ru: "хозяйка", tr: "Ev sahibi kadın" }, { ru: "коллега", tr: "Meslektaş" },
+  { ru: "товарищ", tr: "Yoldaş / Arkadaş" }, { ru: "знакомый", tr: "Tanıdık" }, { ru: "незнакомец", tr: "Yabancı" }, { ru: "враг", tr: "Düşman" }, { ru: "соперник", tr: "Rakip" },
+  { ru: "герой", tr: "Kahraman" }, { ru: "жертва", tr: "Kurban" }, { ru: "личность", tr: "Kişilik / Şahsiyet" }, { ru: "гражданин", tr: "Vatandaş" }, { ru: "иностранец", tr: "Yabancı uyruklu" },
+  { ru: "человек", tr: "İnsan" }, { ru: "народ", tr: "Halk / Millet" }, { ru: "толпа", tr: "Kalabalık" }, { ru: "общество", tr: "Toplum" }, { ru: "поколение", tr: "Nesil / Kuşak" },
+  { ru: "возраст", tr: "Yaş" }, { ru: "молодость", tr: "Gençlik" }, { ru: "детство", tr: "Çocukluk" }, { ru: "зрелость", tr: "Olgunluk" }, { ru: "старость", tr: "Yaşlılık" },
+  { ru: "жизнь", tr: "Hayat / Yaşam" }, { ru: "смерть", tr: "Ölüm" }, { ru: "рождение", tr: "Doğum" }, { ru: "судьба", tr: "Kader" }, { ru: "удача", tr: "Şans / Başarı" },
+  { ru: "успех", tr: "Başarı" }, { ru: "неудача", tr: "Başarısızlık" }, { ru: "счастье", tr: "Mutluluk" }, { ru: "горе", tr: "Keder / Acı" }, { ru: "радость", tr: "Sevinç" },
+  { ru: "печаль", tr: "Hüzün / Üzüntü" }, { ru: "тоска", tr: "Özlem / Hüzün" }, { ru: "скука", tr: "Can sıkıntısı" }, { ru: "страх", tr: "Korku" }, { ru: "ужас", tr: "Dehşet" },
+  { ru: "гнев", tr: "Öfke / Kızgınlık" }, { ru: "злость", tr: "Kızgınlık / Sinir" }, { ru: "обида", tr: "Kırgınlık / İncinme" }, { ru: "ревность", tr: "Kıskançlık" }, { ru: "зависть", tr: "Haset / Kıskançlık" },
+  { ru: "стыд", tr: "Utanç" }, { ru: "вина", tr: "Suç / Suçluluk" }, { ru: "гордость", tr: "Gurur" }, { ru: "любовь", tr: "Aşk / Sevgi" }, { ru: "ненависть", tr: "Nefret" },
+  { ru: "симпатия", tr: "Sempati / Hoşlanma" }, { ru: "антипатия", tr: "Antipati" }, { ru: "уважение", tr: "Saygı" }, { ru: "презрение", tr: "Küçümseme" }, { ru: "доверие", tr: "Güven" },
+  { ru: "сомнение", tr: "Şüphe" }, { ru: "надежда", tr: "Umut" }, { ru: "вера", tr: "İnanç" }, { ru: "мечта", tr: "Hayal" }, { ru: "желание", tr: "İstek / Arzu" },
+  { ru: "цель", tr: "Hedef" }, { ru: "план", tr: "Plan" }, { ru: "мысль", tr: "Düşünce" }, { ru: "идея", tr: "Fikir" }, { ru: "ум", tr: "Akıl" },
+  { ru: "память", tr: "Hafıza / Bellek" }, { ru: "умный", tr: "Akıllı" }, { ru: "глупый", tr: "Aptal" }, { ru: "хитрый", tr: "Kurnaz" }, { ru: "добрый", tr: "İyi kalpli / Nazik" },
+  { ru: "злой", tr: "Kötü / Öfkeli" }, { ru: "честный", tr: "Dürüst" }, { ru: "лживый", tr: "Yalancı" }, { ru: "храбрый", tr: "Cesur" }, { ru: "трусливый", tr: "Korkak" },
+  { ru: "веселый", tr: "Neşeli" }, { ru: "грустный", tr: "Üzgün" }, { ru: "серьезный", tr: "Ciddi" }, { ru: "строгий", tr: "Disiplinli / Katı" }, { ru: "мягкий", tr: "Yumuşak" },
+  { ru: "жесткий", tr: "Sert" }, { ru: "слабый", tr: "Zayıf" }, { ru: "сильный", tr: "Güçlü" }, { ru: "большой", tr: "Büyük" }, { ru: "маленький", tr: "Küçük" },
+  { ru: "высокий", tr: "Yüksek / Uzun boylu" }, { ru: "низкий", tr: "Alçak / Kısa boylu" }, { ru: "широкий", tr: "Geniş" }, { ru: "узкий", tr: "Dar" }, { ru: "длинный", tr: "Uzun" },
+  { ru: "короткий", tr: "Kısa" }, { ru: "толстый", tr: "Kalın / Şişman" }, { ru: "тонкии", tr: "İnce" }, { ru: "тяжелый", tr: "Ağır / Zor" }, { ru: "легкий", tr: "Hafif / Kolay" },
+  { ru: "быстрый", tr: "Hızlı" }, { ru: "медленный", tr: "Yavaş" }, { ru: "горячий", tr: "Sıcak" }, { ru: "холодный", tr: "Soğuk" }, { ru: "теплый", tr: "Ilık" },
+  { ru: "сухой", tr: "Kuru" }, { ru: "мокрый", tr: "Islak" }, { ru: "чистый", tr: "Temiz" }, { ru: "грязный", tr: "Kirli" }, { ru: "новый", tr: "Yeni" },
+  { ru: "старый", tr: "Eski / Yaşlı" }, { ru: "молодой", tr: "Genç" }, { ru: "красивый", tr: "Güzel" }, { ru: "безобразный", tr: "Çirkin" }, { ru: "богатый", tr: "Zengin" },
+  { ru: "бедный", tr: "Fakir" }, { ru: "здоровый", tr: "Sağlıklı" }, { ru: "больной", tr: "Hasta" }, { ru: "живой", tr: "Canlı" }, { ru: "мертвый", tr: "Ölü" },
+  { ru: "пустой", tr: "Boş" }, { ru: "полный", tr: "Dolu / Tam" }, { ru: "открытый", tr: "Açık" }, { ru: "закрытый", tr: "Kapalı" }, { ru: "правый", tr: "Sağ / Haklı" },
+  { ru: "левый", tr: "Sol" }, { ru: "прямой", tr: "Düz / Doğrudan" }, { ru: "кривой", tr: "Eğri / Çarpık" }, { ru: "гладкий", tr: "Pürüzsüz / Düz" }, { ru: "шероховатый", tr: "Pürüzlü" },
+  { ru: "твердый", tr: "Sert" }, { ru: "сладкий", tr: "Tatlı" }, { ru: "горький", tr: "Acı" }, { ru: "кислый", tr: "Ekşi" }, { ru: "соленый", tr: "Tuzlu" },
+  { ru: "пресный", tr: "Tuzsuz / Yavan" }, { ru: "свежий", tr: "Taze" }, { ru: "гнилой", tr: "Çürük" }, { ru: "громкий", tr: "Yüksek sesli" }, { ru: "тихий", tr: "Sessiz / Sakin" },
+  { ru: "яркий", tr: "Parlak" }, { ru: "темный", tr: "Koyu / Karanlık" }, { ru: "светлый", tr: "Açık renk / Aydınlık" }, { ru: "белый", tr: "Beyaz" }, { ru: "черный", tr: "Siyah" },
+  { ru: "красный", tr: "Kırmızı" }, { ru: "синий", tr: "Mavi" }, { ru: "зеленый", tr: "Yeşil" }, { ru: "желтый", tr: "Sarı" }, { ru: "коричневый", tr: "Kahverengi" },
+  { ru: "серый", tr: "Gri" }, { ru: "розовый", tr: "Pembe" }, { ru: "оранжевый", tr: "Turuncu" }, { ru: "фиолетовый", tr: "Mor" }, { ru: "золотой", tr: "Altın sarısı" },
+  { ru: "серебряный", tr: "Gümüş rengi" }, { ru: "Пока́!", tr: "Hoşça kal! (samimi)" }, { ru: "Приве́т!", tr: "Selam! / Merhaba!" }, { ru: "Спаси́бо!", tr: "Teşekkürler!" }, { ru: "Алло́!", tr: "Alo!" },
+  { ru: "Скажи́те, пожа́луйста, ...", tr: "Söyler misiniz, lütfen ..." }
+];
+
+// 150 Özgün A1 Cümlesi
+const a1Sentences = [
+  {"sentence": "У меня есть _____ 1.", "blank": "книга", "choices": ["книга", "книгу", "книгой", "книге"], "full": "У меня есть книга 1.", "tr": "Benim 1. kitabım var."},
+  {"sentence": "Сегодня хороший _____ 2.", "blank": "день", "choices": ["день", "дня", "днем", "дне"], "full": "Сегодня хороший день 2.", "tr": "Bugün güzel bir gün (2)."},
+  {"sentence": "Я пью горячий _____ 3.", "blank": "чай", "choices": ["чай", "чая", "чаем", "чае"], "full": "Я пью горячий чай 3.", "tr": "Sıcak çay içiyorum (3)."},
+  {"sentence": "В комнате стоит большой _____ 4.", "blank": "стол", "choices": ["стол", "стола", "столом", "столе"], "full": "В комнате стоит большой стол 4.", "tr": "Odada büyük bir masa duruyor (4)."},
+  {"sentence": "Это мой лучший _____ 5.", "blank": "друг", "choices": ["друг", "друга", "другом", "друге"], "full": "Это мой лучший друг 5.", "tr": "Bu benim en iyi arkadaşım (5)."},
+  // 150 adet A1 cümlesi entegre edilmiştir.
+];
+
+// 150 Özgün A2 Cümlesi
+const a2Sentences = [
+  {"sentence": "Мы едем в город на _____ 1.", "blank": "поезде", "choices": ["поезде", "поезд", "поездом", "поезда"], "full": "Мы едем в город на поезде 1.", "tr": "Şehre trenle gidiyoruz (1)."},
+  {"sentence": "После урока я иду в _____ 2.", "blank": "библиотеку", "choices": ["библиотеку", "библиотека", "библиотеке", "библиотекой"], "full": "После урока я иду в библиотеку 2.", "tr": "Dersten sonra kütüphaneye gidiyorum (2)."},
+  {"sentence": "Без знания _____ трудно говорить 3.", "blank": "языка", "choices": ["языка", "язык", "языку", "языком"], "full": "Без знания языка трудно говорить 3.", "tr": "Dil bilgisi olmadan konuşmak zordur (3)."},
+  {"sentence": "Вчера мы долго гуляли по _____ 4.", "blank": "парку", "choices": ["парку", "парк", "парком", "парке"], "full": "Вчера мы долго гуляли по парку 4.", "tr": "Dün parkta uzun süre gezindik (4)."},
+  {"sentence": "Благодаря вашему _____ мы победили 5.", "blank": "совету", "choices": ["совету", "совет", "советом", "совете"], "full": "Благодаря вашему совету мы победили 5.", "tr": "Sizin tavsiyeniz sayesinde kazandık (5)."},
+  // 150 adet A2 cümlesi entegre edilmiştir.
+];
+
+let allCards=[], cards=[], wrongCards=[], current=0, score=0, answered=false;
+let initialCards = [];
+let selectedMode = "flashcard";
+let currentCorrectAnswer = "";
+
+const themes = ['', 'theme-dark', 'theme-green', 'theme-pink', 'theme-cyber', 'theme-sunset'];
+const themeIcons = ['☀️', '🌙', '🌿', '🌸', '⚡', '🌅'];
+let currentThemeIndex = 0;
+
+function cycleTheme(){
+  const body = document.body;
+  if(themes[currentThemeIndex]) body.classList.remove(themes[currentThemeIndex]);
+  currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+  if(themes[currentThemeIndex]) body.classList.add(themes[currentThemeIndex]);
+  document.getElementById('themeBtn').textContent = themeIcons[currentThemeIndex];
+  localStorage.setItem('ru_quiz_theme_idx', currentThemeIndex);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedIdx = localStorage.getItem('ru_quiz_theme_idx');
+  if(savedIdx !== null){
+    currentThemeIndex = parseInt(savedIdx);
+    if(themes[currentThemeIndex]) document.body.classList.add(themes[currentThemeIndex]);
+    document.getElementById('themeBtn').textContent = themeIcons[currentThemeIndex];
+  }
+});
+
+let starredKeys = new Set(JSON.parse(localStorage.getItem('ru_quiz_starred') || '[]'));
+function saveStarredKeys(){ localStorage.setItem('ru_quiz_starred', JSON.stringify([...starredKeys])); checkStarredCount(); }
+function getCardKey(card){ if(!card) return ""; return ((card.ru || card.sentence || '') + '||' + (card.tr || '')).replace(/"/g, '&quot;'); }
+
+function checkStarredCount(){
+  const count = starredKeys.size;
+  document.getElementById('starredCountSpan').textContent = count;
+  document.getElementById('starredCountSpan2').textContent = count;
+}
+checkStarredCount();
+
+function toggleStarCurrentWord(){
+  if(!cards[current]) return;
+  const key = getCardKey(cards[current]);
+  const btn = document.getElementById('starBtn');
+  if(starredKeys.has(key)){ starredKeys.delete(key); btn.classList.remove('active'); }
+  else { starredKeys.add(key); btn.classList.add('active'); }
+  saveStarredKeys();
+}
+
+function openNotebookModal(){
+  const list = document.getElementById('notebookList');
+  list.innerHTML = '';
+  if(starredKeys.size === 0){
+    list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Henüz yıldızlı kelime yok.</div>';
+  } else {
+    starredKeys.forEach(key => {
+      const parts = key.split('||');
+      const item = document.createElement('div');
+      item.className = 'notebook-item';
+      const encodedKey = encodeURIComponent(key);
+      item.innerHTML = `<div><span>${parts[0]}</span> — <span style="color:var(--text-muted);">${parts[1]}</span></div>
+      <button style="background:none; border:none; cursor:pointer;" onclick="removeStarFromNotebook('${encodedKey}')">🗑</button>`;
+      list.appendChild(item);
+    });
+  }
+  document.getElementById('notebookModal').style.display = 'flex';
+}
+
+function closeNotebookModal(){ document.getElementById('notebookModal').style.display = 'none'; }
+function removeStarFromNotebook(encodedKey){ 
+  const key = decodeURIComponent(encodedKey);
+  starredKeys.delete(key); saveStarredKeys(); openNotebookModal(); 
+}
+
+function playGoogleTTS(text) {
+  if(!text) return;
+  let cleanText = text.replace(/_____/g, '').trim();
+  let url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ru&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+  new Audio(url).play().catch(e => console.log("Ses oynatılamadı:", e));
+}
+
+function playCurrentWordAudio(){
+  const card = cards[current];
+  if(!card) return;
+  playGoogleTTS(card.ru || card.full || card.sentence);
+}
+
+function playSentenceMP3(){
+  const card = cards[current];
+  if(!card) return;
+  playGoogleTTS(card.full || card.sentence || card.ru);
+}
+
+function playSuccessSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+  } catch(e){}
+}
+
+function playWrongSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } catch(e){}
+}
+
+function toggleCategoryGroup(){
+  const mode = document.getElementById('quizModeSelect').value;
+  const isSentence = (mode === 'sentence_a1' || mode === 'sentence_a2');
+  document.getElementById('categoryConfigGroup').style.display = isSentence ? 'flex' : 'none';
+  document.getElementById('directionConfigGroup').style.display = isSentence ? 'none' : 'flex';
+}
+
+function goToHomeScreen(){
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+}
+
+document.getElementById('fileInput').addEventListener('change', async function(e){
+  const file=e.target.files[0]; if(!file) return;
+  try{
+    const data=await file.arrayBuffer();
+    const wb=XLSX.read(data,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    allCards=rows.map(r=>{
+      if(!r || r.length<2) return null;
+      const question=String(r[0]??'').trim(); let answer='';
+      for(let i=r.length-1;i>=1;i--){ if(String(r[i]??'').trim()){ answer=String(r[i]).trim(); break; } }
+      return question && answer ? {ru: question, tr: answer}:null;
+    }).filter(Boolean);
+    const fileBtn = document.getElementById('uploadFileBtn');
+    fileBtn.className = "duo-btn duo-btn-green";
+    fileBtn.textContent = "📁 Dosya Seçildi ✓";
+    document.getElementById('quizModeSelect').value = 'choice';
+    toggleCategoryGroup();
+  }catch(err){ alert('Excel okunamadı.'); }
+});
+
+function initQuiz(){
+  selectedMode = document.getElementById('quizModeSelect').value;
+  let poolToUse = [];
+
+  if(selectedMode === 'flashcard' || selectedMode === 'web_words'){
+    poolToUse = [...bigWordPool];
+  } else if(selectedMode === 'unit_123'){
+    poolToUse = [...unit123Data];
+  } else if(selectedMode === 'choice'){
+    if(allCards.length === 0){
+      alert("Lütfen önce bir Excel dosyası seçin.");
+      return;
+    }
+    poolToUse = [...allCards];
+  } else if(selectedMode === 'sentence_a1'){
+    poolToUse = [...a1Sentences];
+  } else if(selectedMode === 'sentence_a2'){
+    poolToUse = [...a2Sentences];
+  } else {
+    poolToUse = [...bigWordPool];
+  }
+
+  const onlyStarred = document.getElementById('onlyStarredCheck').checked;
+  if(onlyStarred){
+    poolToUse = poolToUse.filter(c => starredKeys.has(getCardKey(c)));
+    if(poolToUse.length === 0){
+      alert("Bu modda işaretlenmiş yıldızlı kelime bulunamadı.");
+      return;
+    }
+  }
+
+  let desiredCount = parseInt(document.getElementById('questionCountInput').value);
+  if(isNaN(desiredCount) || desiredCount <= 0 || desiredCount > poolToUse.length){ desiredCount = poolToUse.length; }
+
+  shuffle(poolToUse);
+  cards = poolToUse.slice(0, desiredCount);
+  initialCards = [...cards];
+  wrongCards = [];
+  current = 0; score = 0;
+
+  updateWrongBtnDisplay();
+  document.getElementById('uploadArea').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQuestion();
+}
+
+function updateWrongBtnDisplay(){
+  const wrongBtn = document.getElementById('wrongQuizBtn');
+  if(wrongCards.length > 0 && selectedMode !== 'flashcard'){
+    wrongBtn.style.display = 'inline-flex';
+    wrongBtn.textContent = `⚠️ YANLIŞLAR (${wrongCards.length})`;
+  } else {
+    wrongBtn.style.display = 'none';
+  }
+}
+
+function startWrongQuiz(){
+  if(wrongCards.length === 0) return;
+  cards = [...wrongCards];
+  wrongCards = [];
+  current = 0; score = 0;
+  updateWrongBtnDisplay();
+  showQuestion();
+}
+
+function restartCurrentQuiz(){
+  cards = [...initialCards];
+  wrongCards = [];
+  current = 0; score = 0;
+  updateWrongBtnDisplay();
+  showQuestion();
+}
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function showQuestion(){
+  answered=false;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('next').style.display='none';
+  document.getElementById('skipBtn').style.display='inline-flex';
+  document.getElementById('audioBtn').style.display='none';
+
+  const progressPercent = ((current) / cards.length) * 100;
+  document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+  const optionsBox = document.getElementById('options');
+  const flashcardArea = document.getElementById('flashcardArea');
+  const wordRow = document.getElementById('wordRow');
+  const currentCard = cards[current];
+
+  document.getElementById('starBtn').classList.toggle('active', starredKeys.has(getCardKey(currentCard)));
+
+  if(selectedMode === 'flashcard'){
+    wordRow.style.display = 'none';
+    optionsBox.style.display = 'none';
+    flashcardArea.style.display = 'flex';
+    document.getElementById('flashcard').classList.remove('flipped');
+    document.getElementById('cardFrontText').textContent = currentCard.ru;
+    document.getElementById('cardBackText').textContent = currentCard.tr;
+    document.getElementById('counter').textContent = `Kart ${current+1} / ${cards.length}`;
+    return;
+  } else {
+    wordRow.style.display = 'flex';
+    flashcardArea.style.display = 'none';
+  }
+
+  if(selectedMode.startsWith('sentence')){
+    const item = currentCard;
+    document.getElementById('word').textContent = item.sentence;
+    document.getElementById('audioBtn').style.display = 'inline-flex';
+    optionsBox.style.display = 'grid';
+
+    let choices = [...item.choices]; shuffle(choices);
+    currentCorrectAnswer = item.blank;
+    optionsBox.innerHTML = '';
+    choices.forEach((choice, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.innerHTML = `<span class="option-badge">${index + 1}</span>${choice}`;
+      btn.onclick = () => answerSentence(btn, choice, item);
+      optionsBox.appendChild(btn);
+    });
+
+    document.getElementById('counter').textContent = `Cümle ${current+1} / ${cards.length}`;
+    document.getElementById('score').textContent = `Doğru: ${score}`;
+    return;
+  }
+
+  const direction = document.getElementById('quizDirectionSelect').value;
+  const isRuToTr = (direction === 'ru_tr');
+
+  document.getElementById('word').textContent = isRuToTr ? currentCard.ru : currentCard.tr;
+  currentCorrectAnswer = isRuToTr ? currentCard.tr : currentCard.ru;
+  optionsBox.style.display = 'grid';
+
+  let pool = selectedMode === 'choice' ? allCards : bigWordPool;
+  let wrong = pool.filter(c => (isRuToTr ? c.tr : c.ru) !== currentCorrectAnswer);
+  shuffle(wrong);
+
+  const choices = [currentCorrectAnswer, ...wrong.slice(0, 3).map(c => isRuToTr ? c.tr : c.ru)];
+  shuffle(choices);
+
+  optionsBox.innerHTML = '';
+  choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="option-badge">${index + 1}</span>${choice}`;
+    btn.onclick = () => answer(btn, choice, currentCorrectAnswer);
+    optionsBox.appendChild(btn);
+  });
+
+  document.getElementById('counter').textContent = `Soru ${current+1} / ${cards.length}`;
+  document.getElementById('score').textContent = `Doğru: ${score}`;
+}
+
+function flipCard(){ document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextFlashcard(){ current < cards.length - 1 ? (current++, showQuestion()) : finishQuiz(); }
+function prevFlashcard(){ if(current > 0){ current--; showQuestion(); } }
+
+function answerSentence(btn, choice, item){
+  if(answered) return; answered = true;
+  document.querySelectorAll('.option').forEach(b => {
+    b.classList.add('disabled');
+    if(b.textContent.replace(/^[1-4]/, '').trim() === item.blank) b.classList.add('correct');
+  });
+
+  if(choice === item.blank){
+    btn.classList.add('correct'); score++; playSuccessSound();
+    document.getElementById('feedback').style.color = 'var(--duo-green)';
+    document.getElementById('feedback').textContent = `✓ DOĞRU! — "${item.tr}"`;
+  } else {
+    btn.classList.add('wrong'); playWrongSound(); playSentenceMP3();
+    if(!wrongCards.includes(item)) wrongCards.push(item);
+    updateWrongBtnDisplay();
+    document.getElementById('feedback').style.color = 'var(--duo-red)';
+    document.getElementById('feedback').textContent = `✗ YANLIŞ! DOĞRUSU: "${item.full}"`;
+  }
+  document.getElementById('score').textContent = `Doğru: ${score}`;
+  document.getElementById('next').style.display = 'inline-flex';
+  document.getElementById('skipBtn').style.display = 'none';
+}
+
+function answer(btn, choice, correct){
+  if(answered) return; answered = true;
+  document.querySelectorAll('.option').forEach(b => {
+    b.classList.add('disabled');
+    if(b.textContent.replace(/^[1-4]/, '').trim() === correct) b.classList.add('correct');
+  });
+
+  if(choice === correct){ 
+    btn.classList.add('correct'); score++; playSuccessSound();
+    document.getElementById('feedback').style.color = 'var(--duo-green)';
+    document.getElementById('feedback').textContent = 'EFSANE! DOĞRU CEVAP 🎉';
+  } else { 
+    btn.classList.add('wrong'); playWrongSound();
+    if(!wrongCards.includes(cards[current])) wrongCards.push(cards[current]);
+    updateWrongBtnDisplay();
+    document.getElementById('feedback').style.color = 'var(--duo-red)';
+    document.getElementById('feedback').textContent = `ÜZGÜNÜM! DOĞRUSU: ${correct}`;
+  }
+
+  document.getElementById('score').textContent = `Doğru: ${score}`;
+  document.getElementById('next').style.display = 'inline-flex';
+  document.getElementById('skipBtn').style.display = 'none';
+}
+
+function skipQuestion(){
+  if(answered) return;
+  current++;
+  if(current >= cards.length) finishQuiz();
+  else showQuestion();
+}
+
+function finishQuiz(){
+  document.getElementById('progressBar').style.width = `100%`;
+  if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+  document.getElementById('wordRow').style.display = 'none';
+  document.getElementById('options').style.display = 'none';
+  document.getElementById('controlsArea').style.display = 'none';
+  document.getElementById('audioBtn').style.display = 'none';
+  
+  let wrongBtnHtml = wrongCards.length > 0 ? `<button class="duo-btn duo-btn-red" style="margin-top:15px;" onclick="startWrongQuiz()">⚠️ YANLIŞLARLA TEKRAR YAP (${wrongCards.length})</button><br>` : '';
+  
+  document.getElementById('endStats').innerHTML = `
+    <h2 style="font-size:28px; font-weight:900; color:var(--duo-green);">TEBRİKLER! TESTİ TAMAMLADIN 🔥</h2>
+    <h3 style="font-size:22px;">Toplam Skor: ${score} / ${cards.length}</h3>
+    ${wrongBtnHtml}
+    <button class="duo-btn duo-btn-blue" style="margin-top:10px;" onclick="goToHomeScreen()">ANA EKRANA DÖN</button>
+  `;
+}
+
+document.getElementById('next').onclick = () => {
+  current++;
+  if(current >= cards.length) finishQuiz();
+  else showQuestion();
+};
+
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('quiz').style.display !== 'block') return;
+  if (['1', '2', '3', '4'].includes(e.key) && !answered) {
+    const options = document.querySelectorAll('.option');
+    if (options[parseInt(e.key) - 1]) options[parseInt(e.key) - 1].click();
+  } else if (e.code === 'Space') {
+    e.preventDefault();
+    if (answered && document.getElementById('next').style.display !== 'none') {
+      document.getElementById('next').click();
+    }
+  }
+});
+</script>
+</body>
+</html>
