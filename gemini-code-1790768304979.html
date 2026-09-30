@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rusça Kelime & Cümle Quiz - Duolingo Style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900;1000&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+/* 🎨 Temalar ve Renk Paletleri */
+:root {
+  --bg-color: #f7f9fa;
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --text-main: #4b4b4b;
+  --text-muted: #777777;
+  --anim-color: #1e293b;
+  
+  --duo-green: #58cc02;
+  --duo-green-shadow: #46a302;
+  --duo-blue: #1cb0f6;
+  --duo-blue-shadow: #1899d6;
+  --duo-yellow: #ffc800;
+  --duo-yellow-shadow: #e5b200;
+  --duo-red: #ff4b4b;
+  --duo-red-shadow: #ea2b2b;
+  --duo-gray: #e5e5e5;
+  --duo-gray-shadow: #cecece;
+}
+
+body.theme-dark {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --anim-color: #38bdf8;
+  --duo-gray: #334155;
+  --duo-gray-shadow: #1e293b;
+}
+
+body.theme-green {
+  --bg-color: #ecfdf5;
+  --card-bg: #ffffff;
+  --card-border: #a7f3d0;
+  --text-main: #065f46;
+  --text-muted: #047857;
+  --anim-color: #059669;
+  --duo-green: #10b981;
+  --duo-green-shadow: #059669;
+  --duo-gray: #d1fae5;
+  --duo-gray-shadow: #a7f3d0;
+}
+
+body.theme-pink {
+  --bg-color: #fff1f2;
+  --card-bg: #ffffff;
+  --card-border: #fecdd3;
+  --text-main: #881337;
+  --text-muted: #9f1239;
+  --anim-color: #e11d48;
+  --duo-green: #fb7185;
+  --duo-green-shadow: #e11d48;
+  --duo-gray: #ffe4e6;
+  --duo-gray-shadow: #fecdd3;
+}
+
+body.theme-cyber {
+  --bg-color: #09090b;
+  --card-bg: #18181b;
+  --card-border: #27272a;
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;
+  --anim-color: #a855f7;
+  --duo-green: #8b5cf6;
+  --duo-green-shadow: #6d28d9;
+  --duo-gray: #27272a;
+  --duo-gray-shadow: #18181b;
+}
+
+body.theme-sunset {
+  --bg-color: #fff7ed;
+  --card-bg: #ffffff;
+  --card-border: #fed7aa;
+  --text-main: #7c2d12;
+  --text-muted: #9a3412;
+  --anim-color: #ea580c;
+  --duo-green: #f97316;
+  --duo-green-shadow: #c2410c;
+  --duo-gray: #ffedd5;
+  --duo-gray-shadow: #fed7aa;
+}
+
+* { 
+  box-sizing: border-box; 
+  font-family: 'Nunito', sans-serif;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  padding: 20px 10px;
+  background: var(--bg-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-main);
+  transition: background 0.3s ease, color 0.3s ease;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Arka Plan Animasyonları */
+.bg-animations {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; overflow: hidden;
+  pointer-events: none;
+  margin: 0; padding: 0;
+}
+
+.bg-animations li {
+  position: absolute; list-style: none;
+  display: flex; justify-content: center; align-items: center;
+  font-weight: 900; 
+  color: var(--anim-color); 
+  opacity: 0.16; 
+  top: -100px;
+  animation: rainMatrixAnim 7s infinite linear;
+}
+
+body.theme-dark .bg-animations li, body.theme-cyber .bg-animations li { 
+  text-shadow: 0 0 10px currentColor;
+}
+
+.bg-animations li:nth-child(1)  { left: 2%;  animation-duration: 6s;  animation-delay: 0s;   font-size: 34px; }
+.bg-animations li:nth-child(2)  { left: 7%;  animation-duration: 8s;  animation-delay: 2s;   font-size: 42px; }
+.bg-animations li:nth-child(3)  { left: 13%; animation-duration: 5s;  animation-delay: 1s;   font-size: 28px; }
+.bg-animations li:nth-child(4)  { left: 19%; animation-duration: 7s;  animation-delay: 3s;   font-size: 45px; }
+.bg-animations li:nth-child(5)  { left: 25%; animation-duration: 6.5s;animation-delay: 0.5s; font-size: 38px; }
+.bg-animations li:nth-child(6)  { left: 31%; animation-duration: 5.5s;animation-delay: 2.5s; font-size: 50px; }
+.bg-animations li:nth-child(7)  { left: 37%; animation-duration: 9s;  animation-delay: 1.5s; font-size: 30px; }
+.bg-animations li:nth-child(8)  { left: 43%; animation-duration: 6s;  animation-delay: 3.5s; font-size: 40px; }
+.bg-animations li:nth-child(9)  { left: 49%; animation-duration: 7.5s;animation-delay: 0.8s; font-size: 35px; }
+.bg-animations li:nth-child(10) { left: 55%; animation-duration: 5.2s;animation-delay: 2.2s; font-size: 48px; }
+.bg-animations li:nth-child(11) { left: 61%; animation-duration: 8.2s;animation-delay: 1.2s; font-size: 33px; }
+.bg-animations li:nth-child(12) { left: 67%; animation-duration: 6.8s;animation-delay: 2.8s; font-size: 44px; }
+.bg-animations li:nth-child(13) { left: 73%; animation-duration: 5.8s;animation-delay: 0.2s; font-size: 36px; }
+.bg-animations li:nth-child(14) { left: 79%; animation-duration: 7.2s;animation-delay: 1.8s; font-size: 41px; }
+.bg-animations li:nth-child(15) { left: 85%; animation-duration: 6.3s;animation-delay: 0.7s; font-size: 37px; }
+.bg-animations li:nth-child(16) { left: 91%; animation-duration: 7.8s;animation-delay: 2.3s; font-size: 46px; }
+.bg-animations li:nth-child(17) { left: 97%; animation-duration: 5.4s;animation-delay: 1.1s; font-size: 32px; }
+
+@keyframes rainMatrixAnim {
+  0% { transform: translateY(-10vh) rotate(0deg) scale(0.8); opacity: 0; }
+  20% { opacity: 0.25; }
+  80% { opacity: 0.25; }
+  100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; }
+}
+
+.duo-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 14px 24px;
+  font-size: 17px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.duo-btn:active {
+  transform: translateY(4px) !important;
+  box-shadow: none !important;
+}
+
+.duo-btn-green { background-color: var(--duo-green); color: #fff; box-shadow: 0 5px 0 var(--duo-green-shadow); }
+.duo-btn-blue { background-color: var(--duo-blue); color: #fff; box-shadow: 0 5px 0 var(--duo-blue-shadow); }
+.duo-btn-yellow { background-color: var(--duo-yellow); color: #fff; box-shadow: 0 5px 0 var(--duo-yellow-shadow); }
+.duo-btn-gray { background-color: var(--duo-gray); color: var(--text-main); box-shadow: 0 5px 0 var(--duo-gray-shadow); }
+.duo-btn-red { background-color: var(--duo-red); color: #fff; box-shadow: 0 5px 0 var(--duo-red-shadow); }
+
+/* Sadece İkon İçeren Yuvarlak Tema Butonu */
+.theme-toggle { 
+  position: absolute; 
+  top: 20px; 
+  right: 20px; 
+  z-index: 10; 
+  width: 48px; 
+  height: 48px; 
+  padding: 0; 
+  font-size: 22px; 
+  border-radius: 50% !important; 
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  width: min(750px, 100%);
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 24px;
+  padding: clamp(20px, 4vw, 40px);
+  box-shadow: 0 10px 0 var(--card-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 0;
+  font-size: clamp(22px, 2.8vw, 30px);
+  font-weight: 900;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.flag-icon {
+  display: inline-flex;
+  flex-direction: column;
+  width: 36px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  vertical-align: middle;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+.flag-icon span { flex: 1; width: 100%; }
+.flag-icon .white { background-color: #FFFFFF; }
+.flag-icon .blue { background-color: #0039A6; }
+.flag-icon .red { background-color: #D52B1E; }
+
+.upload {
+  border: 2px dashed var(--card-border);
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 35px);
+  text-align: center;
+  background: rgba(0,0,0,0.01);
+}
+
+.quiz-config {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+}
+
+.quiz-config-item { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+.quiz-config label { font-weight: 800; color: var(--text-main); font-size: 16px; }
+
+.quiz-config select, .quiz-config input[type=number] {
+  padding: 12px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 14px;
+  border: 2px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  outline: none;
+  width: min(320px, 100%);
+  text-align: center;
+}
+
+.duo-progress-container {
+  width: 100%;
+  height: 16px;
+  background: var(--duo-gray);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.duo-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--duo-green);
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.word-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0 30px;
+}
+
+.word {
+  text-align: center;
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  filter: grayscale(100%);
+  opacity: 0.4;
+  transition: all 0.2s;
+}
+.star-btn.active { filter: none; opacity: 1; transform: scale(1.2); }
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.option {
+  border: 2px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-radius: 16px;
+  padding: 18px 14px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 4px 0 var(--card-border);
+  transition: all 0.1s ease;
+  position: relative;
+}
+
+.option-badge {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 800;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.option:hover {
+  background: rgba(28, 176, 246, 0.08);
+  border-color: var(--duo-blue);
+  box-shadow: 0 4px 0 var(--duo-blue-shadow);
+}
+
+.option:active { transform: translateY(4px); box-shadow: none; }
+
+.option.correct {
+  background-color: #d7ffb8 !important;
+  border-color: var(--duo-green) !important;
+  color: var(--duo-green-shadow) !important;
+  box-shadow: 0 4px 0 var(--duo-green-shadow) !important;
+}
+
+.option.wrong {
+  background-color: #ffdfe0 !important;
+  border-color: var(--duo-red) !important;
+  color: var(--duo-red-shadow) !important;
+  box-shadow: 0 4px 0 var(--duo-red-shadow) !important;
+}
+
+.option.disabled { pointer-events: none; }
+
+.flashcard-area {
+  perspective: 1000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.flashcard {
+  width: min(450px, 100%);
+  height: 240px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+  cursor: pointer;
+}
+
+.flashcard.flipped { transform: rotateY(180deg); }
+
+.flashcard-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  border: 2px solid var(--card-border);
+  background: var(--card-bg);
+  box-shadow: 0 6px 0 var(--card-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  background: rgba(28, 176, 246, 0.05);
+  border-color: var(--duo-blue);
+  box-shadow: 0 6px 0 var(--duo-blue-shadow);
+}
+
+.flashcard-text { font-size: 32px; font-weight: 900; text-align: center; }
+.flashcard-sub { font-size: 14px; color: var(--text-muted); margin-top: 10px; font-weight: 800; }
+
+#feedback {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 900;
+  min-height: 36px;
+  margin: 20px 0;
+}
+
+.controls { display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap; }
+
+.notebook-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 100; justify-content: center; align-items: center; }
+.notebook-paper { background: var(--card-bg); border: 2px solid var(--card-border); width: min(600px, 90vw); max-height: 80vh; border-radius: 24px; padding: 25px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+.notebook-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
+.notebook-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.notebook-item { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 14px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
+
+@media(max-width:600px) { .options { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- Arka Planda Animasyonlar -->
+<ul class="bg-animations">
+  <li>А</li><li>Б</li><li>В</li><li>Г</li><li>Д</li><li>Е</li><li>Ё</li><li>Ж</li><li>З</li><li>И</li>
+  <li>Й</li><li>К</li><li>Л</li><li>М</li><li>Н</li><li>О</li><li>П</li><li>Р</li><li>С</li><li>Т</li>
+  <li>У</li><li>Ф</li><li>Х</li><li>Ц</li><li>Ч</li><li>Ш</li><li>Щ</li><li>Ъ</li><li>Ы</li><li>Ь</li>
+  <li>Э</li><li>Ю</li><li>Я</li><li>🪆</li><li>🇷🇺</li><li>🐻</li><li>❄️</li><li>🏛️</li>
+  <li>Ж</li><li>Ф</li><li>Ы</li><li>🇷🇺</li><li>🪆</li><li>Ш</li><li>Ч</li><li>Э</li>
+</ul>
+
+<!-- Sadece İkonlu Tema Değiştirme Butonu -->
+<button class="duo-btn duo-btn-gray theme-toggle" id="themeBtn" onclick="cycleTheme()" title="Tema Değiştir">☀️</button>
+
+<div class="container" id="mainContainer">
+  <h1>
+    <div class="flag-icon">
+      <span class="white"></span>
+      <span class="blue"></span>
+      <span class="red"></span>
+    </div>
+    Rusça Kelime & Cümle Quiz
+  </h1>
+
+  <div id="uploadArea" class="upload">
+    <div style="font-size:20px; font-weight:900; margin-bottom:6px;">Excel Dosyası Yükle</div>
+    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">1. Sütun: Rusça | Son Sütun: Türkçe</div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+    <button id="uploadFileBtn" class="duo-btn duo-btn-blue" onclick="document.getElementById('fileInput').click()">📁 Dosya Seç</button>
+    
+    <div class="quiz-config">
+      <div class="quiz-config-item">
+        <label for="quizModeSelect">Çalışma Modu</label>
+        <select id="quizModeSelect" onchange="toggleCategoryGroup()">
+          <option value="choice">🔘 Excel Kelimeleri (Çoktan Seçmeli)</option>
+          <option value="flashcard">🎴 Kelime Kartları / Flashcard (Dev Havuz)</option>
+          <option value="web_words">🌐 Genel Rusça Kelime Havuzu</option>
+          <option value="sentence_a1">📖 A1 Boşluk Doldurmalı Cümle Modu (150+ Varyasyon)</option>
+          <option value="sentence_a2">📘 A2 Boşluk Doldurmalı Cümle Modu (150+ Varyasyon)</option>
+        </select>
+      </div>
+
+      <div class="quiz-config-item" id="categoryConfigGroup" style="display:none;">
+        <label for="categorySelect">Kategori Seçin</label>
+        <select id="categorySelect">
+          <option value="all">🔀 Tüm Kategoriler (Karışık)</option>
+          <option value="food">🍕 Restoran & Yemek</option>
+          <option value="travel">✈️ Seyahat & Ulaşım</option>
+          <option value="health">🏥 Eczane & Sağlık</option>
+          <option value="daily">💬 Günlük Sohbet & Tanışma</option>
+          <option value="shopping">🛍️ Alışveriş & Fiyat</option>
+          <option value="hobby">🎨 Hobi & Zaman</option>
+        </select>
+      </div>
+
+      <div class="quiz-config-item" id="directionConfigGroup">
+        <label for="quizDirectionSelect">Soru Yönü</label>
+        <select id="quizDirectionSelect">
+          <option value="ru_tr">🇷🇺 Rusça ➔ 🇹🇷 Türkçe</option>
+          <option value="tr_ru">🇹🇷 Türkçe ➔ 🇷🇺 Rusça</option>
+        </select>
+      </div>
+
+      <div class="quiz-config-item" id="questionCountGroup">
+        <label for="questionCountInput">Soru Sayısı</label>
+        <input type="number" id="questionCountInput" min="1" placeholder="Tüm Kelimeler">
+      </div>
+
+      <div class="quiz-config-item" id="starredCheckGroup">
+        <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="onlyStarredCheck" style="width:18px; height:18px;">
+          <span>⭐ Sadece Yıldızlı Kelimeler (<span id="starredCountSpan">0</span>)</span>
+        </label>
+      </div>
+
+      <button class="duo-btn duo-btn-yellow" onclick="openNotebookModal()">📓 Yıldızlı Kelimeler Defteri (<span id="starredCountSpan2">0</span>)</button>
+
+      <button id="startQuizBtn" class="duo-btn duo-btn-green" style="width:100%; margin-top:10px;" onclick="initQuizFromExcel()">BAŞLA ➔</button>
+    </div>
+  </div>
+
+  <div id="quiz" style="display:none;">
+    <div class="progress-header">
+      <button class="duo-btn duo-btn-gray" style="padding:6px 12px; font-size:12px;" onclick="goToHomeScreen()">✖ ÇIKIŞ</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="restartBtn" class="duo-btn duo-btn-blue" style="padding:6px 12px; font-size:12px;" onclick="restartCurrentQuiz()">🔄 TEKRAR</button>
+        <button id="wrongQuizBtn" class="duo-btn duo-btn-red" style="padding:6px 12px; font-size:12px; display:none;" onclick="startWrongQuiz()">⚠️ YANLIŞLAR (0)</button>
+      </div>
+      <span id="counter">Soru 1 / 10</span>
+      <span id="score" style="color:var(--duo-green);">Doğru: 0</span>
+    </div>
+
+    <div class="duo-progress-container">
+      <div id="progressBar" class="duo-progress-bar"></div>
+    </div>
+
+    <div id="questionContainer">
+      <div class="word-row" id="wordRow">
+        <div id="word" class="word"></div>
+        <button id="starBtn" class="star-btn" title="Yıldızla" onclick="toggleStarCurrentWord()">⭐</button>
+        <button style="background:none; border:none; font-size:28px; cursor:pointer;" onclick="playCurrentWordAudio()">🔊</button>
+      </div>
+
+      <div id="flashcardArea" class="flashcard-area" style="display:none;">
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+          <div class="flashcard-face flashcard-front">
+            <div id="cardFrontText" class="flashcard-text"></div>
+            <div class="flashcard-sub">🔎 Çevirmek için tıkla</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div id="cardBackText" class="flashcard-text"></div>
+            <div class="flashcard-sub">🇹🇷 Türkçe Anlamı</div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+          <button class="duo-btn duo-btn-gray" onclick="prevFlashcard()">⬅ ÖNCEKİ</button>
+          <button class="duo-btn duo-btn-blue" onclick="flipCard()">🔄 ÇEVİR</button>
+          <button class="duo-btn duo-btn-green" onclick="nextFlashcard()">SONRAKİ ➔</button>
+        </div>
+      </div>
+
+      <button id="audioBtn" class="duo-btn duo-btn-blue" style="display:none; margin:0 auto 20px;" onclick="playSentenceMP3()">🔊 Cümleyi Dinle</button>
+
+      <div id="options" class="options"></div>
+    </div>
+
+    <div id="feedback"></div>
+
+    <div class="controls" id="controlsArea">
+      <button id="skipBtn" class="duo-btn duo-btn-yellow" onclick="skipQuestion()">PAS GEÇ</button>
+      <button id="next" class="duo-btn duo-btn-green" style="display:none;">DEVAM ET ➔</button>
+    </div>
+    <div id="endStats" style="text-align: center; margin-top: 20px;"></div>
+  </div>
+</div>
+
+<div id="notebookModal" class="notebook-modal">
+  <div class="notebook-paper">
+    <div class="notebook-header">
+      <div style="font-size:20px; font-weight:900; color:var(--duo-yellow-shadow);">⭐ Yıldızlı Kelimeler Defteri</div>
+      <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeNotebookModal()">✖</button>
+    </div>
+    <div id="notebookList" class="notebook-list"></div>
+  </div>
+</div>
+
+<script>
+let allCards=[], cards=[], wrongCards=[], current=0, score=0, answered=false;
+let initialCards = [];
+let selectedMode = "choice";
+let currentCorrectAnswer = "";
+
+// Çoklu Tema Sistemi Yönetimi (Sadece İkonlar)
+const themes = ['', 'theme-dark', 'theme-green', 'theme-pink', 'theme-cyber', 'theme-sunset'];
+const themeIcons = ['☀️', '🌙', '🌿', '🌸', '⚡', '🌅'];
+let currentThemeIndex = 0;
+
+function cycleTheme(){
+  const body = document.body;
+  if(themes[currentThemeIndex]) body.classList.remove(themes[currentThemeIndex]);
+  currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+  if(themes[currentThemeIndex]) body.classList.add(themes[currentThemeIndex]);
+  
+  document.getElementById('themeBtn').textContent = themeIcons[currentThemeIndex];
+  localStorage.setItem('ru_quiz_theme_idx', currentThemeIndex);
+}
+
+// Sayfa açıldığında kayıtlı temayı yükle
+window.addEventListener('DOMContentLoaded', () => {
+  const savedIdx = localStorage.getItem('ru_quiz_theme_idx');
+  if(savedIdx !== null){
+    currentThemeIndex = parseInt(savedIdx);
+    if(themes[currentThemeIndex]) document.body.classList.add(themes[currentThemeIndex]);
+    document.getElementById('themeBtn').textContent = themeIcons[currentThemeIndex];
+  }
+});
+
+const webWordsPool = [
+  { ru: "Здравствуйте", tr: "Merhaba" }, { ru: "Спасибо", tr: "Teşekkür ederim" }, { ru: "Пожалуйста", tr: "Lütfen / Rica ederim" }, { ru: "Хорошо", tr: "İyi / Tamam" }, { ru: "Извините", tr: "Affedersiniz" },
+  { ru: "Да", tr: "Evet" }, { ru: "Нет", tr: "Hayır" }, { ru: "Семья", tr: "Aile" }, { ru: "Друг", tr: "Arkadaş" }, { ru: "Дом", tr: "Ev" },
+  { ru: "Работа", tr: "İş" }, { ru: "Время", tr: "Zaman" }, { ru: "Город", tr: "Şehir" }, { ru: "Улица", tr: "Sokak" }, { ru: "Машина", tr: "Araba" },
+  { ru: "Вода", tr: "Su" }, { ru: "Еда", tr: "Yemek" }, { ru: "Деньги", tr: "Para" }, { ru: "Сегодня", tr: "Bugün" }, { ru: "Завтра", tr: "Yarın" },
+  { ru: "Вчера", tr: "Dün" }, { ru: "Утро", tr: "Sabah" }, { ru: "Вечер", tr: "Akşam" }, { ru: "Ночь", tr: "Gece" }, { ru: "Красивый", tr: "Güzel" },
+  { ru: "Большой", tr: "Büyük" }, { ru: "Маленький", tr: "Küçük" }, { ru: "Новый", tr: "Yeni" }, { ru: "Старый", tr: "Eski" }, { ru: "Быстро", tr: "Hızlı" },
+  { ru: "Медленно", tr: "Yavaş" }, { ru: "Понимать", tr: "Anlamak" }, { ru: "Говорить", tr: "Konuşmak" }, { ru: "Читать", tr: "Okumak" }, { ru: "Писать", tr: "Yazmak" },
+  { ru: "Любить", tr: "Sevmek" }, { ru: "Жить", tr: "Yaşamak" }, { ru: "Книга", tr: "Kitap" }, { ru: "Стол", tr: "Masa" }, { ru: "Стул", tr: "Sandalye" },
+  { ru: "Окно", tr: "Pencere" }, { ru: "Дверь", tr: "Kapı" }, { ru: "Школа", tr: "Okul" }, { ru: "Университет", tr: "Üniversite" }, { ru: "Студент", tr: "Öğrenci" },
+  { ru: "Учитель", tr: "Öğretmen" }, { ru: "Магазин", tr: "Mağaza" }, { ru: "Цена", tr: "Fiyat" }, { ru: "Поезд", tr: "Tren" }, { ru: "Самолет", tr: "Uçak" },
+  { ru: "Кошка", tr: "Kedi" }, { ru: "Собака", tr: "Köpek" }, { ru: "Птица", tr: "Kuş" }, { ru: "Солнце", tr: "Güneş" }, { ru: "Луна", tr: "Ay" },
+  { ru: "Зима", tr: "Kış" }, { ru: "Лето", tr: "Yaz" }, { ru: "Весна", tr: "Bahar" }, { ru: "Осень", tr: "Sonbahar" }, { ru: "Цвет", tr: "Renk" },
+  { ru: "Красный", tr: "Kırmızı" }, { ru: "Синий", tr: "Mavi" }, { ru: "Зеленый", tr: "Yeşil" }, { ru: "Белый", tr: "Beyaz" }, { ru: "Черный", tr: "Siyah" },
+  { ru: "Кофе", tr: "Kahve" }, { ru: "Чай", tr: "Çay" }, { ru: "Молоко", tr: "Süt" }, { ru: "Хлеб", tr: "Ekmek" }, { ru: "Мясо", tr: "Et" },
+  { ru: "Рыба", tr: "Balık" }, { ru: "Яблоко", tr: "Elma" }, { ru: "Сыр", tr: "Peynir" }, { ru: "Сахар", tr: "Şeker" }, { ru: "Соль", tr: "Tuz" },
+  { ru: "Музыка", tr: "Müzik" }, { ru: "Фильм", tr: "Film" }, { ru: "Игра", tr: "Oyun" }, { ru: "Спорт", tr: "Spor" }, { ru: "Медицина", tr: "Tıp" },
+  { ru: "Больница", tr: "Hastane" }, { ru: "Врач", tr: "Doktor" }, { ru: "Лекарство", tr: "İlaç" }, { ru: "Аптека", tr: "Eczane" }, { ru: "Здоровье", tr: "Sağlık" },
+  { ru: "Помощь", tr: "Yardım" }, { ru: "Вопрос", tr: "Soru" }, { ru: "Ответ", tr: "Cevap" }, { ru: "Правда", tr: "Doğru / Gerçek" }, { ru: "Ошибка", tr: "Hata" },
+  { ru: "Жизнь", tr: "Hayat" }, { ru: "Мир", tr: "Dünya / Barış" }, { ru: "Страна", tr: "Ülke" }, { ru: "Язык", tr: "Dil" }, { ru: "Слово", tr: "Kelime" }
+];
+
+const sentenceCategories = {
+  food: [
+    { sentence: "Я хочу _____ .", blank: "кофе", choices: ["кофе", "кофем", "кофя", "кофеем"], full: "Я хочу кофе.", tr: "Kahve istiyorum." },
+    { sentence: "Дайте мне _____ , пожалуйста.", blank: "меню", choices: ["меню", "менюем", "менюха", "менюа"], full: "Дайте мне меню, пожалуйста.", tr: "Lütfen bana menüyü verin." },
+    { sentence: "Я хочу кушать _____ .", blank: "пиццу", choices: ["пиццу", "пицца", "пиццей", "пицце"], full: "Я хочу кушать пиццу.", tr: "Pizza yemek istiyorum." },
+    { sentence: "У вас есть холодный _____ ?", blank: "сок", choices: ["сок", "сока", "соком", "соке"], full: "У вас есть холодный сок?", tr: "Sizde soğuk meyve suyu var mı?" },
+    { sentence: "Я выпил чашку горячего _____ .", blank: "чая", choices: ["чая", "чай", "чаем", "чае"], full: "Я выпил чашку горячего чая.", tr: "Bir fincan sıcak çay içtim." },
+    { sentence: "Мы заказали вкусный _____ .", blank: "суп", choices: ["суп", "супа", "супом", "супе"], full: "Мы заказали вкусный суп.", tr: "Lezzetli bir çorba sipariş ettik." },
+    { sentence: "Я люблю свежий _____ каждый день.", blank: "хлеб", choices: ["хлеб", "хлеба", "хлебом", "хлебе"], full: "Я люблю свежий хлеб каждый день.", tr: "Her gün taze ekmek severim." },
+    { sentence: "На завтрак я ем _____ с сыром.", blank: "яйцо", choices: ["яйцо", "яйца", "яйцу", "яйцом"], full: "На завтрак я ем яйцо с сыром.", tr: "Kahvaltıda peynirli yumurta yiyorum." }
+  ],
+  travel: [
+    { sentence: "Где находится _____ ?", blank: "метро", choices: ["метро", "метром", "метра", "метрах"], full: "Где находится метро?", tr: "Metro nerede?" },
+    { sentence: "Сколько это _____ ?", blank: "стоит", choices: ["стоит", "стоят", "стоить", "стоил"], full: "Сколько это стоит?", tr: "Bu ne kadar tutuyor?" },
+    { sentence: "Где можно купить _____ ?", blank: "билет", choices: ["билет", "билета", "билетом", "билете"], full: "Где можно купить билет?", tr: "Nereden bilet satın alınabilir?" },
+    { sentence: "Где находится автобусная _____ ?", blank: "остановка", choices: ["остановка", "остановку", "остановке", "остановкой"], full: "Где находится автобусная остановка?", tr: "Otobüs durağı nerede?" },
+    { sentence: "Поезд отправляется _____ десять минут.", blank: "через", choices: ["через", "после", "до", "около"], full: "Поезд отправляется через десять минут.", tr: "Tren 10 dakika sonra kalkıyor." },
+    { sentence: "Я хочу забронировать один _____ в отеле.", blank: "номер", choices: ["номер", "номера", "номером", "номере"], full: "Я хочу забронировать один номер в отеле.", tr: "Otelde bir oda ayırtmak istiyorum." },
+    { sentence: "Самолет прилетает в Москву во _____ .", blank: "время", choices: ["время", "времени", "временем", "времена"], full: "Самолет прилетает в Москву вовремя.", tr: "Uçak Moskova'ya zamanında varıyor." }
+  ],
+  health: [
+    { sentence: "Где находится _____ ?", blank: "аптека", choices: ["аптека", "аптеку", "аптеке", "аптекой"], full: "Где находится аптека?", tr: "Eczane nerede?" },
+    { sentence: "У меня сильно болит _____ .", blank: "голова", choices: ["голова", "голову", "головой", "голове"], full: "У меня сильно болит голова.", tr: "Başım çok ağrıyor." },
+    { sentence: "Завтра я должен пойти в _____ .", blank: "больницу", choices: ["больницу", "больница", "больнице", "больницей"], full: "Завтра я должен пойти в больницу.", tr: "Yarın hastaneye gitmeliyim." },
+    { sentence: "Мне нужно купить _____ .", blank: "лекарство", choices: ["лекарство", "лекарства", "лекарством", "лекарстве"], full: "Мне нужно купить лекарство.", tr: "İlaç satın almam gerekiyor." },
+    { sentence: "Я хочу посоветоваться с _____ .", blank: "врачом", choices: ["врачом", "врача", "врачу", "врач"], full: "Я хочу посоветоваться с врачом.", tr: "Doktora danışmak istiyorum." }
+  ],
+  daily: [
+    { sentence: "Как тебя _____ ?", blank: "зовут", choices: ["зовут", "зовешь", "зовутна", "имя"], full: "Как тебя зовут?", tr: "Adın ne?" },
+    { sentence: "Меня _____ Анна.", blank: "зовут", choices: ["зовут", "зовешь", "меня", "быть"], full: "Меня зовут Анна.", tr: "Benim adım Anna." },
+    { sentence: "Я живу в _____ .", blank: "Стамбуле", choices: ["Стамбуле", "Стамбул", "Стамбулом", "Стамбула"], full: "Я живу в Стамбуле.", tr: "İstanbul'da yaşıyorum." },
+    { sentence: "Сегодня хорошая _____ .", blank: "погода", choices: ["погода", "погоду", "погодой", "погоде"], full: "Сегодня хорошая погода.", tr: "Bugün hava güzel." },
+    { sentence: "Как у тебя _____ ?", blank: "дела", choices: ["дела", "дело", "делами", "дел"], full: "Как у тебя дела?", tr: "İşler nasıl?" }
+  ],
+  shopping: [
+    { sentence: "Какая на этот товар _____ ?", blank: "цена", choices: ["цена", "цену", "ценой", "цене"], full: "Какая на этот товар цена?", tr: "Bu ürünün fiyatı nedir?" },
+    { sentence: "Я могу заплатить по _____ ?", blank: "карте", choices: ["карте", "карта", "карту", "картой"], full: "Я могу заплатить по карте?", tr: "Kartla ödeme yapabilir miyim?" },
+    { sentence: "Эта рубашка очень _____ .", blank: "дорогая", choices: ["дорогая", "дорогой", "дорогое", "дорогие"], full: "Эта рубашка очень дорогая.", tr: "Bu gömlek çok pahalı." }
+  ],
+  hobby: [
+    { sentence: "В свободное время я читаю _____ .", blank: "книги", choices: ["книги", "книга", "книгой", "книгу"], full: "В свободное время я читаю книги.", tr: "Boş zamanlarımda kitap okuyorum." },
+    { sentence: "Мы любим слушать классическую _____ .", blank: "музыку", choices: ["музыку", "музыка", "музыке", "музыкой"], full: "Мы любим слушать классическую музыку.", tr: "Klasik müzik dinlemeyi severiz." }
+  ]
+};
+
+let starredKeys = new Set(JSON.parse(localStorage.getItem('ru_quiz_starred') || '[]'));
+
+function saveStarredKeys(){ localStorage.setItem('ru_quiz_starred', JSON.stringify([...starredKeys])); checkStarredCount(); }
+function getCardKey(card){ if(!card) return ""; return ((card.ru || card.sentence || '') + '||' + (card.tr || '')).replace(/"/g, '&quot;'); }
+
+function checkStarredCount(){
+  const count = starredKeys.size;
+  document.getElementById('starredCountSpan').textContent = count;
+  document.getElementById('starredCountSpan2').textContent = count;
+}
+checkStarredCount();
+
+function toggleStarCurrentWord(){
+  if(!cards[current]) return;
+  const key = getCardKey(cards[current]);
+  const btn = document.getElementById('starBtn');
+  if(starredKeys.has(key)){ starredKeys.delete(key); btn.classList.remove('active'); }
+  else { starredKeys.add(key); btn.classList.add('active'); }
+  saveStarredKeys();
+}
+
+function openNotebookModal(){
+  const list = document.getElementById('notebookList');
+  list.innerHTML = '';
+  if(starredKeys.size === 0){
+    list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Henüz yıldızlı kelime yok.</div>';
+  } else {
+    starredKeys.forEach(key => {
+      const parts = key.split('||');
+      const item = document.createElement('div');
+      item.className = 'notebook-item';
+      const encodedKey = encodeURIComponent(key);
+      item.innerHTML = `<div><span>${parts[0]}</span> — <span style="color:var(--text-muted);">${parts[1]}</span></div>
+      <button style="background:none; border:none; cursor:pointer;" onclick="removeStarFromNotebook('${encodedKey}')">🗑</button>`;
+      list.appendChild(item);
+    });
+  }
+  document.getElementById('notebookModal').style.display = 'flex';
+}
+
+function closeNotebookModal(){ document.getElementById('notebookModal').style.display = 'none'; }
+function removeStarFromNotebook(encodedKey){ 
+  const key = decodeURIComponent(encodedKey);
+  starredKeys.delete(key); saveStarredKeys(); openNotebookModal(); 
+}
+
+function playGoogleTTS(text) {
+  if(!text) return;
+  let cleanText = text.replace(/_____/g, '').trim();
+  let url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ru&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+  new Audio(url).play().catch(e => console.log("Ses oynatılamadı:", e));
+}
+
+function playCurrentWordAudio(){
+  const card = cards[current];
+  if(!card) return;
+  playGoogleTTS(card.ru || card.full || card.sentence);
+}
+
+function playSentenceMP3(){
+  const card = cards[current];
+  if(!card) return;
+  playGoogleTTS(card.full || card.sentence || card.ru);
+}
+
+function playSuccessSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+  } catch(e){}
+}
+
+function playWrongSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } catch(e){}
+}
+
+function toggleCategoryGroup(){
+  const mode = document.getElementById('quizModeSelect').value;
+  const isSentence = (mode === 'sentence_a1' || mode === 'sentence_a2');
+  document.getElementById('categoryConfigGroup').style.display = isSentence ? 'flex' : 'none';
+  document.getElementById('directionConfigGroup').style.display = isSentence ? 'none' : 'flex';
+}
+
+function goToHomeScreen(){
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+}
+
+document.getElementById('fileInput').addEventListener('change', async function(e){
+  const file=e.target.files[0]; if(!file) return;
+  try{
+    const data=await file.arrayBuffer();
+    const wb=XLSX.read(data,{type:'array'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    allCards=rows.map(r=>{
+      if(!r || r.length<2) return null;
+      const question=String(r[0]??'').trim(); let answer='';
+      for(let i=r.length-1;i>=1;i--){ if(String(r[i]??'').trim()){ answer=String(r[i]).trim(); break; } }
+      return question && answer ? {ru: question, tr: answer}:null;
+    }).filter(Boolean);
+    
+    const fileBtn = document.getElementById('uploadFileBtn');
+    fileBtn.className = "duo-btn duo-btn-green";
+    fileBtn.textContent = "📁 Dosya Seçildi ✓";
+
+  }catch(err){ alert('Excel okunamadı.'); }
+});
+
+function initQuizFromExcel(){
+  selectedMode = document.getElementById('quizModeSelect').value;
+  let poolToUse = [];
+
+  if(selectedMode === 'sentence_a1' || selectedMode === 'sentence_a2'){
+    const category = document.getElementById('categorySelect').value;
+    if(category === 'all'){
+      Object.values(sentenceCategories).forEach(arr => poolToUse.push(...arr));
+    } else {
+      poolToUse = sentenceCategories[category] || [];
+    }
+  } else if(selectedMode === 'web_words' || selectedMode === 'flashcard'){
+    poolToUse = [...webWordsPool];
+  } else {
+    poolToUse = allCards.length > 0 ? [...allCards] : [...webWordsPool];
+  }
+
+  const onlyStarred = document.getElementById('onlyStarredCheck').checked;
+  if(onlyStarred){
+    poolToUse = poolToUse.filter(c => starredKeys.has(getCardKey(c)));
+    if(poolToUse.length === 0){
+      alert("Bu modda işaretlenmiş yıldızlı kelime bulunamadı.");
+      return;
+    }
+  }
+
+  let desiredCount = parseInt(document.getElementById('questionCountInput').value);
+  if(isNaN(desiredCount) || desiredCount <= 0 || desiredCount > poolToUse.length){ desiredCount = poolToUse.length; }
+
+  shuffle(poolToUse);
+  cards = poolToUse.slice(0, desiredCount);
+  initialCards = [...cards];
+  wrongCards = [];
+  current = 0; score = 0;
+
+  updateWrongBtnDisplay();
+  document.getElementById('uploadArea').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  showQuestion();
+}
+
+function updateWrongBtnDisplay(){
+  const wrongBtn = document.getElementById('wrongQuizBtn');
+  if(wrongCards.length > 0 && selectedMode !== 'flashcard'){
+    wrongBtn.style.display = 'inline-flex';
+    wrongBtn.textContent = `⚠️ YANLIŞLAR (${wrongCards.length})`;
+  } else {
+    wrongBtn.style.display = 'none';
+  }
+}
+
+function startWrongQuiz(){
+  if(wrongCards.length === 0) return;
+  cards = [...wrongCards];
+  wrongCards = [];
+  current = 0; score = 0;
+  updateWrongBtnDisplay();
+  showQuestion();
+}
+
+function restartCurrentQuiz(){
+  cards = [...initialCards];
+  wrongCards = [];
+  current = 0; score = 0;
+  updateWrongBtnDisplay();
+  showQuestion();
+}
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function showQuestion(){
+  answered=false;
+  document.getElementById('feedback').textContent='';
+  document.getElementById('next').style.display='none';
+  document.getElementById('skipBtn').style.display='inline-flex';
+  document.getElementById('audioBtn').style.display='none';
+
+  const progressPercent = ((current) / cards.length) * 100;
+  document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+  const optionsBox = document.getElementById('options');
+  const flashcardArea = document.getElementById('flashcardArea');
+  const wordRow = document.getElementById('wordRow');
+  const currentCard = cards[current];
+
+  document.getElementById('starBtn').classList.toggle('active', starredKeys.has(getCardKey(currentCard)));
+
+  if(selectedMode === 'flashcard'){
+    wordRow.style.display = 'none';
+    optionsBox.style.display = 'none';
+    flashcardArea.style.display = 'flex';
+    document.getElementById('flashcard').classList.remove('flipped');
+    document.getElementById('cardFrontText').textContent = currentCard.ru;
+    document.getElementById('cardBackText').textContent = currentCard.tr;
+    document.getElementById('counter').textContent = `Kart ${current+1} / ${cards.length}`;
+    return;
+  } else {
+    wordRow.style.display = 'flex';
+    flashcardArea.style.display = 'none';
+  }
+
+  if(selectedMode.startsWith('sentence')){
+    const item = currentCard;
+    document.getElementById('word').textContent = item.sentence;
+    document.getElementById('audioBtn').style.display = 'inline-flex';
+    optionsBox.style.display = 'grid';
+
+    let choices = [...item.choices]; shuffle(choices);
+    currentCorrectAnswer = item.blank;
+    optionsBox.innerHTML = '';
+    choices.forEach((choice, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.innerHTML = `<span class="option-badge">${index + 1}</span>${choice}`;
+      btn.onclick = () => answerSentence(btn, choice, item);
+      optionsBox.appendChild(btn);
+    });
+
+    document.getElementById('counter').textContent = `Cümle ${current+1} / ${cards.length}`;
+    document.getElementById('score').textContent = `Doğru: ${score}`;
+    return;
+  }
+
+  const direction = document.getElementById('quizDirectionSelect').value;
+  const isRuToTr = (direction === 'ru_tr');
+
+  document.getElementById('word').textContent = isRuToTr ? currentCard.ru : currentCard.tr;
+  currentCorrectAnswer = isRuToTr ? currentCard.tr : currentCard.ru;
+  optionsBox.style.display = 'grid';
+
+  let pool = (selectedMode === 'web_words' || selectedMode === 'flashcard') ? webWordsPool : (allCards.length > 0 ? allCards : webWordsPool);
+  let wrong = pool.filter(c => (isRuToTr ? c.tr : c.ru) !== currentCorrectAnswer);
+  shuffle(wrong);
+
+  const choices = [currentCorrectAnswer, ...wrong.slice(0, 3).map(c => isRuToTr ? c.tr : c.ru)];
+  shuffle(choices);
+
+  optionsBox.innerHTML = '';
+  choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="option-badge">${index + 1}</span>${choice}`;
+    btn.onclick = () => answer(btn, choice, currentCorrectAnswer);
+    optionsBox.appendChild(btn);
+  });
+
+  document.getElementById('counter').textContent = `Soru ${current+1} / ${cards.length}`;
+  document.getElementById('score').textContent = `Doğru: ${score}`;
+}
+
+function flipCard(){ document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextFlashcard(){ current < cards.length - 1 ? (current++, showQuestion()) : finishQuiz(); }
+function prevFlashcard(){ if(current > 0){ current--; showQuestion(); } }
+
+function answerSentence(btn, choice, item){
+  if(answered) return; answered = true;
+  document.querySelectorAll('.option').forEach(b => {
+    b.classList.add('disabled');
+    if(b.textContent.replace(/^[1-4]/, '').trim() === item.blank) b.classList.add('correct');
+  });
+
+  if(choice === item.blank){
+    btn.classList.add('correct'); score++; playSuccessSound();
+    document.getElementById('feedback').style.color = 'var(--duo-green)';
+    document.getElementById('feedback').textContent = `✓ DOĞRU! — "${item.tr}"`;
+  } else {
+    btn.classList.add('wrong'); playWrongSound(); playSentenceMP3();
+    if(!wrongCards.includes(item)) wrongCards.push(item);
+    updateWrongBtnDisplay();
+    document.getElementById('feedback').style.color = 'var(--duo-red)';
+    document.getElementById('feedback').textContent = `✗ YANLIŞ! DOĞRUSU: "${item.full}"`;
+  }
+  document.getElementById('score').textContent = `Doğru: ${score}`;
+  document.getElementById('next').style.display = 'inline-flex';
+  document.getElementById('skipBtn').style.display = 'none';
+}
+
+function answer(btn, choice, correct){
+  if(answered) return; answered = true;
+  document.querySelectorAll('.option').forEach(b => {
+    b.classList.add('disabled');
+    if(b.textContent.replace(/^[1-4]/, '').trim() === correct) b.classList.add('correct');
+  });
+
+  if(choice === correct){ 
+    btn.classList.add('correct'); score++; playSuccessSound();
+    document.getElementById('feedback').style.color = 'var(--duo-green)';
+    document.getElementById('feedback').textContent = 'EFSANE! DOĞRU CEVAP 🎉';
+  } else { 
+    btn.classList.add('wrong'); playWrongSound();
+    if(!wrongCards.includes(cards[current])) wrongCards.push(cards[current]);
+    updateWrongBtnDisplay();
+    document.getElementById('feedback').style.color = 'var(--duo-red)';
+    document.getElementById('feedback').textContent = `ÜZGÜNÜM! DOĞRUSU: ${correct}`;
+  }
+
+  document.getElementById('score').textContent = `Doğru: ${score}`;
+  document.getElementById('next').style.display = 'inline-flex';
+  document.getElementById('skipBtn').style.display = 'none';
+}
+
+function skipQuestion(){
+  if(answered) return;
+  current++;
+  if(current >= cards.length) finishQuiz();
+  else showQuestion();
+}
+
+function finishQuiz(){
+  document.getElementById('progressBar').style.width = `100%`;
+  if (typeof confetti === 'function') confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+  document.getElementById('wordRow').style.display = 'none';
+  document.getElementById('options').style.display = 'none';
+  document.getElementById('controlsArea').style.display = 'none';
+  document.getElementById('audioBtn').style.display = 'none';
+  
+  let wrongBtnHtml = wrongCards.length > 0 ? `<button class="duo-btn duo-btn-red" style="margin-top:15px;" onclick="startWrongQuiz()">⚠️ YANLIŞLARLA TEKRAR YAP (${wrongCards.length})</button><br>` : '';
+  
+  document.getElementById('endStats').innerHTML = `
+    <h2 style="font-size:28px; font-weight:900; color:var(--duo-green);">TEBRİKLER! TESTİ TAMAMLADIN 🔥</h2>
+    <h3 style="font-size:22px;">Toplam Skor: ${score} / ${cards.length}</h3>
+    ${wrongBtnHtml}
+    <button class="duo-btn duo-btn-blue" style="margin-top:10px;" onclick="goToHomeScreen()">ANA EKRANA DÖN</button>
+  `;
+}
+
+document.getElementById('next').onclick = () => {
+  current++;
+  if(current >= cards.length) finishQuiz();
+  else showQuestion();
+};
+
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('quiz').style.display !== 'block') return;
+  if (['1', '2', '3', '4'].includes(e.key) && !answered) {
+    const options = document.querySelectorAll('.option');
+    if (options[parseInt(e.key) - 1]) options[parseInt(e.key) - 1].click();
+  } else if (e.code === 'Space') {
+    e.preventDefault();
+    if (answered && document.getElementById('next').style.display !== 'none') {
+      document.getElementById('next').click();
+    }
+  }
+});
+</script>
+</body>
+</html>
